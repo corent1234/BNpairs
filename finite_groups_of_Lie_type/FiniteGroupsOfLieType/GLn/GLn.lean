@@ -34,8 +34,8 @@ theorem blockTriangular_of_diagonal (d : n -> R) (b : n-> α ): BlockTriangular 
 /--The group of triangular matrices.-/
 def TriangularGroup [LinearOrder n] : Subgroup (GL n R):= BlockTriangularGroup id
 
-lemma diagonal_invertible_of_triangularGroup (M : GL n R) :
-    M ∈ TriangularGroup → ∀ i : n, IsUnit (M.val i i)  :=by
+lemma diag_invertible_of_triangularGroup (M : GL n R) :
+    M ∈ TriangularGroup → ∀ i : n, IsUnit (M.val i i) :=by
   intro h i
   let u := M⁻¹.val i i
   have : (fun k ↦ M.val i k * M⁻¹.val k i) =
@@ -49,7 +49,6 @@ lemma diagonal_invertible_of_triangularGroup (M : GL n R) :
       rw [h]
       simp
     simp  [blockTriangular_inv_of_blockTriangular this h, ne_of_gt h ]
-
   have: 1 = M.val i i * u := by
     calc
       1 = (1 : GL n R) i i :=by simp
@@ -71,14 +70,11 @@ def ScalarGroup : Subgroup (GL n R) :=  (Units.map (scalar n).toMonoidHom).range
 
 theorem scalarGroup_mem_iff : ∀M : GL n R, M ∈ ScalarGroup ↔ ∃ r : Rˣ, M.val = (scalar n) r.val := by
   intro M
-  constructor
-  · intro ⟨ r, hᵣ⟩
+  constructor <;>
+  { intro ⟨ r, hᵣ⟩
     use r
-    simp [← hᵣ]
-  intro ⟨ r, hᵣ⟩
-  use r
-  apply Units.ext
-  simp [hᵣ]
+    try apply Units.ext
+    simp [← hᵣ]}
 
 theorem scalarGroup_eq_GLnCenter : ScalarGroup = Subgroup.center (GL n R) := by
   obtain _|_ := isEmpty_or_nonempty n
@@ -86,33 +82,30 @@ theorem scalarGroup_eq_GLnCenter : ScalarGroup = Subgroup.center (GL n R) := by
   ext M
   simp [ Subgroup.mem_center_iff, scalarGroup_mem_iff]
   constructor
-  ·
-    intro ⟨ r,h ⟩ N
-    have : N.val* M.val = M.val * N.val → N*M = M *N := by intro h; ext i j ; simp [Units.val_mul, h]
+  · intro ⟨ r,h ⟩ N
+    have : N.val* M.val = M.val * N.val → N*M = M *N := fun h => by ext; simp [Units.val_mul, h]
     apply this
     symm
     rw [h, ← commute_iff_eq]
     apply scalar_commute r.val (fun r' ↦ (commute_iff_eq r.val r').2 (mul_comm r.val r'))
-  intro h
-  have: M.val ∈ Set.range ⇑(Matrix.scalar n) := by
-    rw [mem_range_scalar_iff_commute_transvectionStruct]
-    intro t
-    have: IsUnit t.toMatrix := by
-      rw [isUnit_iff_exists]
-      use t.inv.toMatrix
-      simp [TransvectionStruct.inv_mul, TransvectionStruct.mul_inv]
-    rcases this with ⟨ t',h' ⟩
-    rw [commute_iff_eq, ← h', ← Units.val_mul, ← Units.val_mul, h t']
-  simp at this
-  rcases this with ⟨r, h ⟩
-  have : Invertible (diagonal (fun _:n => r)) := by
-    rw [h]
-    apply Units.invertible
-  inhabit n
-  have: IsUnit r := isUnit_d_of_invertible_diagonal (fun _:n => r) default
-  rcases this with ⟨r', h' ⟩
-  use r'
-  simp [h', ← h]
+  · intro h
+    have: M.val ∈ Set.range ⇑(Matrix.scalar n) := by
+      rw [mem_range_scalar_iff_commute_transvectionStruct]
+      intro t
+      have: IsUnit t.toMatrix := by
+        rw [isUnit_iff_exists]
+        use t.inv.toMatrix
+        simp [TransvectionStruct.inv_mul, TransvectionStruct.mul_inv]
+      rcases this with ⟨ t',h' ⟩
+      rw [commute_iff_eq, ← h', ← Units.val_mul, ← Units.val_mul, h t']
+    simp at this
+    rcases this with ⟨r, h ⟩
+    have : Invertible (diagonal (fun _:n => r)) := by rw [h]; apply Units.invertible
+    inhabit n
+    have: IsUnit r := isUnit_d_of_invertible_diagonal (fun _:n => r) default
+    rcases this with ⟨r', h' ⟩
+    use r'
+    simp [h', ← h]
 
 theorem scalarGroup_le_diagonalGroup :  ScalarGroup ≤ (DiagonalGroup : Subgroup (GL n R))  := by
   intro
@@ -155,7 +148,7 @@ theorem diagonalGroup_eq_inf_triangularGroup_monomialGroup:
   by_cases h : i=j
   · simp [h, d]
   · simp[h]
-    rcases diagonal_invertible_of_triangularGroup (x : GL n F) xTriangular j with ⟨u, h'⟩
+    rcases diag_invertible_of_triangularGroup (x : GL n F) xTriangular j with ⟨u, h'⟩
     apply no_other_line xMonomial
     rw [← h']
     apply Units.ne_zero
@@ -165,10 +158,11 @@ end diagonal
 
 variable (A : Type*)
 open Equiv
-
+/--Some Coxeter Matrix.-/
 def M : CoxeterMatrix A := sorry
+/--The Coxeter System from M to `Perm`.-/
 def perm_coxeterSystem : CoxeterSystem (M A) (Perm n) := sorry
-
+/--The group homomorphism from `MonomialGoup` to the group of M.-/
 noncomputable
 def MonomialCoxeterHom : (MonomialGroup : Subgroup (GL n F)) →* (M A).Group :=
     (perm_coxeterSystem A).mulEquiv.toMonoidHom.comp toPermHom
@@ -189,128 +183,129 @@ theorem monomialCoxeterHom_surj :
   simp [MonomialCoxeterHom]
   apply Function.Surjective.of_comp
   rw [permMatrixGroup_sect, Function.Surjective]
-  repeat intro b ;use b ; simp
+  repeat exact fun b ↦ ⟨b, by simp⟩
 
-
+/--The prop 4 of a BNMphiQuadruplet applies to GLn.-/
 theorem prop4GL {Ma : MonomialGroup} {a : A} (h : MonomialCoxeterHom A Ma = (M A).simple a):
     ∃ Da : DiagonalGroup, ∃ i j : n, i≠j ∧ Ma.val = (PermMatrix_Hom' (swap i j)).val*(Da.val : GL n F)  := by
   rcases monomial_decomposition' Ma with ⟨Da, Ma_eq_PaDa⟩
-  let Pa : (MonomialGroup : Subgroup (GL n F)) := (Subgroup.inclusion PermMatrix_le_MonomialGroup) (PermMatrix_Hom' (toPermHom Ma))
+  let Pa : (MonomialGroup : Subgroup (GL n F)) :=
+    (Subgroup.inclusion PermMatrix_le_MonomialGroup) (PermMatrix_Hom' (toPermHom Ma))
   use Da
   rcases M_simples_are_swaps A n a with ⟨i,j, ineqj, h' ⟩
   use i ;use j
   simp [ineqj]
   rw [Ma_eq_PaDa]
   simp [Pa]
-  have: Function.Injective (PermMatrix_Hom' : Perm n →* PermMatrixGroup) := by
-    apply Function.Injective.of_comp
-    rw [permMatrixGroup_sect' n F, Function.Injective]
-    repeat intro b ;use b ; simp
-    simp
   have : toPermHom Ma = swap i j := by
     simp [← h', MulEquiv.eq_symm_apply,← h, MonomialCoxeterHom]
   rw [this]
 
+/--The lower triangular matrix with only one as diagonal and subdiagonal coefficients.-/
+def T₀  :=  Matrix.of fun i j :n ↦ if i ≤ j then (1:F) else 0
 
+lemma detT_eq_one: det (T₀ : Matrix n n F) = 1 := by
+  rw [Matrix.det_of_upperTriangular]
+  repeat simp [BlockTriangular, T₀]
+
+lemma invdetT : IsUnit (T₀ : Matrix n n F).det := by
+  simp [← ne_eq];
+  apply ne_zero_of_eq_one (detT_eq_one )
+
+/--The matrix T₀ seen as an element of `GL n F`.-/
+noncomputable
+def T : GL n F := GeneralLinearGroup.mk'' (T₀ : Matrix n n F) invdetT
+
+lemma Tcoe : T.val = Matrix.of fun i j :n ↦ if i ≤ j then (1:F) else 0 := by
+  simp [T,T₀, GeneralLinearGroup.mk'', Matrix.nonsingInvUnit]
+lemma triangularT : (T : GL n F) ∈ TriangularGroup := by
+  simp [TriangularGroup, BlockTriangularGroup, BlockTriangular,Tcoe]
 
 theorem prop4GL' {Ma : MonomialGroup } {a:A} (h: MonomialCoxeterHom A Ma = (M A).simple a) :
     {Ma * (b.val: GL n F) * (Ma.val : GL n F) | b :  TriangularGroup} ≠ (TriangularGroup : Subgroup (GL n F)).carrier := by
   simp [Set.ext_iff]
-  let T : GL n F := {
-    val := Matrix.of fun i j :n ↦ if i ≤ j then (1:F) else 0
-    inv := sorry
-    val_inv := sorry
-    inv_val := sorry
-    }
-  have: T ∈ TriangularGroup:= by simp [TriangularGroup, T, BlockTriangularGroup, BlockTriangular] 
-  let M : GL n F:= Ma * T * Ma
-  use M
+  use Ma * (T :GL n F) * Ma
   push_neg
   left
   constructor
   · use T
-  simp [M,TriangularGroup, BlockTriangularGroup, BlockTriangular]
-  rcases prop4GL A h with  ⟨Da,i,j,ineqj,h' ⟩
-  rcases Da with ⟨Da',d,diagdeqDa'⟩
-  have : Invertible (diagonal d) := by rw [← diagdeqDa'] ; apply Da'.invertible
+    exact ⟨triangularT, rfl⟩
+  simp [TriangularGroup, BlockTriangularGroup, BlockTriangular]
+  rcases prop4GL A h with  ⟨⟨Da,d,diagdeqDa⟩,i,j,ineqj,h' ⟩
+  have : Invertible (diagonal d) := by rw [← diagdeqDa] ; apply Da.invertible
   obtain hij|hij := ne_iff_lt_or_gt.1 ineqj
   · use j ; use i
-    simp [hij, h', PermMatrix_mul, mul_PermMatrix, diagdeqDa', diagonal,mul_apply]
+    simp [hij, h', PermMatrix_mul, mul_PermMatrix, diagdeqDa, diagonal,mul_apply,Tcoe]
     have: (fun x ↦
         if (swap i j) x = i then
           (Finset.univ.sum fun x_1 ↦ if x_1 ≤ x then if i = x_1 then d i else 0 else 0) * d ((swap i j) x)
-          else 0 )= fun x ↦ if x =j then  
+          else 0 )= fun x ↦ if x =j then
             (Finset.univ.sum fun x_1 ↦ if x_1 ≤ x then if i = x_1 then d i else 0 else 0) * d ((swap i j) x)
-              else 0 :=by 
+              else 0 :=by
       ext x
       by_cases h: x=j
       · simp [h]
-      have : ¬ swap i j x = i := by 
-        apply_fun (swap i j)
-        simp [h]
+      have : ¬ swap i j x = i := by apply_fun (swap i j); simp [h]
       simp [h, this]
-    simp [this] 
+    simp [this]
     constructor
-    · have : (fun k ↦ if k ≤ j then if i = k then d i else 0 else 0) = 
+    · have : (fun k ↦ if k ≤ j then if i = k then d i else 0 else 0) =
           fun k ↦ if k=i then d i else 0 := by
         ext k
         by_cases h : k=i
-        · simp [h]
-          intro h
-          exfalso
-          apply not_lt_of_gt hij h 
-        simp [h]
-        intro klej not_h
-        exfalso
-        exact h not_h.symm
+        · simp [h] ;intro h ; exfalso ; apply not_lt_of_gt hij h
+        · simp [h] ; intro _ not_h ; exfalso;  exact h not_h.symm
       simp [this]
-      apply noncancel_d_of_invertible_diagonal 
-    apply noncancel_d_of_invertible_diagonal 
+      apply noncancel_d_of_invertible_diagonal
+    · apply noncancel_d_of_invertible_diagonal
   · use i ; use j
-    simp [hij, h', PermMatrix_mul, mul_PermMatrix, diagdeqDa', diagonal,mul_apply]
+    simp [hij, h', PermMatrix_mul, mul_PermMatrix, diagdeqDa, diagonal,mul_apply,Tcoe]
     have: (fun x ↦
         if (swap i j) x = j then
           (Finset.univ.sum fun x_1 ↦ if x_1 ≤ x then if j = x_1 then d j else 0 else 0) * d ((swap i j) x)
-          else 0 )= fun x ↦ if x =i then  
+          else 0 )= fun x ↦ if x =i then
             (Finset.univ.sum fun x_1 ↦ if x_1 ≤ x then if j = x_1 then d j else 0 else 0) * d ((swap i j) x)
-              else 0 :=by 
+              else 0 :=by
       ext x
       by_cases h: x=i
       · simp [h]
-      have : ¬ swap i j x = j := by 
+      have : ¬ swap i j x = j := by
         apply_fun (swap i j)
         simp [h]
       simp [h, this]
-    simp [this] 
+    simp [this]
     constructor
-    · have : (fun k ↦ if k ≤ i then if j = k then d j else 0 else 0) = 
+    · have : (fun k ↦ if k ≤ i then if j = k then d j else 0 else 0) =
           fun k ↦ if k=j then d j else 0 := by
         ext k
         by_cases h : k=j
         · simp [h]
           intro h
           exfalso
-          apply not_lt_of_gt hij h 
+          apply not_lt_of_gt hij h
         simp [h]
-        intro klej not_h
+        intro _ not_h
         exfalso
         exact h not_h.symm
       simp [this]
-      apply noncancel_d_of_invertible_diagonal 
-    apply noncancel_d_of_invertible_diagonal 
-  
+      apply noncancel_d_of_invertible_diagonal
+    apply noncancel_d_of_invertible_diagonal
 
 
+
+
+
+/--The `BNMphiQuadruplet`  structure over `GL n F`.-/
 noncomputable
-def GL' : BNMφQuadruplet (GL n F) A where
+def GL' : BNMphiQuadruplet (GL n F) A where
   B := TriangularGroup
   N := MonomialGroup
   M := M A
-  φ := MonomialCoxeterHom A
+  phi := MonomialCoxeterHom A
   prop1 := sorry
   prop2 := monomialCoxeterHom_surj A
   prop3 := by simp [← diagonalGroup_is_ker_monomialCoexeterHom,diagonalGroup_eq_inf_triangularGroup_monomialGroup ]
-  prop4 := fun _ _ => prop4GL' A 
+  prop4 := fun _ _ => prop4GL' A
   prop5 := sorry
 
 

@@ -10,8 +10,7 @@ variable {n : Type*} [Fintype n]  [DecidableEq n] {R : Type*} [CommRing R] {F : 
 section Monomial
 
 /-- A monomial matrix is a matrix with one and only one nonzero coefficient per line and column. -/
-def Matrix.Monomial (M : Matrix n n F) : Prop :=
-    (∀ i, ∃! j, M i j ≠ 0) ∧ ∀ j, ∃! i, M i j ≠ 0
+def Matrix.Monomial (M : Matrix n n F) : Prop := (∀ i, ∃! j, M i j ≠ 0) ∧ ∀ j, ∃! i, M i j ≠ 0
 
 /-- An explicit definition of the inverse of a `Monomial` matrix. -/
 def MonomialInverse (M : Matrix n n F) : Matrix n n F :=
@@ -40,7 +39,7 @@ lemma no_other_column {M : Matrix n n F} {i j : n} (h : Monomial M) (h2 : M i j 
   rw [Monomial] at h
   contrapose
   intro Mij'neq0
-  rcases (h.1 i) with ⟨ j₀, _ , h' ⟩
+  rcases (h.1 i) with ⟨_, _ , h'⟩
   simp [h' j h2]
   exact h' j' Mij'neq0
 
@@ -50,11 +49,11 @@ lemma no_other_line {M : Matrix n n F} {i j : n} (h : Monomial M) (h2 : M i j �
   contrapose
   intro Mij'neq0
   rw [Monomial] at h
-  rcases (h.2 j) with ⟨ j₀, _ , h' ⟩
+  rcases (h.2 j) with ⟨ _, _ , h' ⟩
   simp [h' i h2]
   exact h' i' Mij'neq0
 
-lemma idontknowhowtocallthisone {M : Matrix n n F} (i₀ j :n )  (h: Monomial M) :
+lemma monmomial_exists_apply {M : Matrix n n F} (i₀ j :n )  (h: Monomial M) :
     (∀ i ≠ i₀, M i j =0) → M i₀ j ≠ 0 := by
   contrapose
   simp
@@ -94,12 +93,11 @@ theorem monomial_invertible {M : Matrix n n F} (hM : M.Monomial): IsUnit M :=
   isUnit_of_left_inverse <| monomialInverse_is_left_inverse hM
 
 /--The inverse of a `Monomial` matrix is `Monomial`-/
-theorem monomial_inv_of_Monomial {M : Matrix n n F} (h : Monomial M) : Monomial M⁻¹ := by
+theorem monomial_inv_of_Monomial {M : Matrix n n F} (h : Monomial M) : Monomial M⁻¹ :=
   have : Invertible M := invertibleOfLeftInverse M (MonomialInverse M) <| monomialInverse_is_left_inverse h
   have :  MonomialInverse M = M⁻¹  :=
     left_inv_eq_right_inv (monomialInverse_is_left_inverse h) (mul_inv_of_invertible M)
-  rw [← this]
-  exact monomial_of_monomialInverse h
+  this ▸ (monomial_of_monomialInverse h)
 
 /-- The product of two `Monomial` matrices is `Monomial`-/
 theorem monomial_mul {M : Matrix n n F} {N : Matrix n n F} (hM :Monomial M) (hN : Monomial N) :
@@ -117,7 +115,7 @@ theorem monomial_mul {M : Matrix n n F} {N : Matrix n n F} (hM :Monomial M) (hN 
         · simp [h]
         · simp [h, no_other_column hM h₁ k h]
       simp [mul_apply,← this]
-      constructor <;> assumption
+      exact ⟨h₁,h₁'⟩
     intro j
     contrapose
     intro jeqjki
@@ -127,29 +125,28 @@ theorem monomial_mul {M : Matrix n n F} {N : Matrix n n F} (hM :Monomial M) (hN 
       · simp [h, no_other_column hN h₁' j jeqjki]
       · simp [no_other_column hM h₁ k h]
     simp [← this,mul_apply]
-
-  intro j
-  rcases hN.2 j with ⟨kj, h₁, _ ⟩
-  rcases hM.2 kj with ⟨ikj, h₁', _⟩
-  use ikj
-  constructor
-  ·
-    have: (fun (k:n) ↦ if k=kj then  M ikj kj * N kj j  else  (0:F)) = fun k ↦ M ikj k * N k j := by
+  · intro j
+    rcases hN.2 j with ⟨kj, h₁, _ ⟩
+    rcases hM.2 kj with ⟨ikj, h₁', _⟩
+    use ikj
+    constructor
+    ·
+      have: (fun (k:n) ↦ if k=kj then  M ikj kj * N kj j  else  (0:F)) = fun k ↦ M ikj k * N k j := by
+        ext k
+        by_cases h : (k=kj)
+        · simp [h]
+        · simp [h,no_other_line hN h₁ k h]
+      simp [mul_apply, ← this]
+      exact ⟨h₁',h₁⟩
+    intro i
+    contrapose
+    intro ieqikj
+    have : (fun _ => (0:F)) = fun k ↦ M i k * N k j := by
       ext k
-      by_cases h : (k=kj)
-      · simp [h]
-      · simp [h,no_other_line hN h₁ k h]
-    simp [mul_apply, ← this]
-    constructor <;> assumption
-  intro i
-  contrapose
-  intro ieqikj
-  have : (fun _ => (0:F)) = fun k ↦ M i k * N k j := by
-    ext k
-    by_cases h : (k = kj)
-    · simp [h,no_other_line hM h₁' i ieqikj]
-    · simp [no_other_line hN h₁ k h]
-  simp [mul_apply,← this]
+      by_cases h : (k = kj)
+      · simp [h,no_other_line hM h₁' i ieqikj]
+      · simp [no_other_line hN h₁ k h]
+    simp [mul_apply,← this]
 
 
 
@@ -167,7 +164,7 @@ lemma isUnit_d_of_invertible_diagonal (d : n -> R)  [Invertible (diagonal d)]:
       d k * ⅟d k = (d * ⅟d) k := by simp
       _          =  (1 : n -> R) k := by rw [Invertible.mul_invOf_self]
       _          = 1 := by simp
-  apply isUnit_of_invertible
+  exact isUnit_of_invertible (d k)
 
 lemma noncancel_d_of_invertible_diagonal (d : n -> F)  [Invertible (diagonal d)]:
   ∀ k, d k ≠ 0 := by
@@ -190,8 +187,7 @@ theorem monomial_of_inv_diagonal  {d : n -> F} (h : Invertible (diagonal d)):
       simp
       intro h
       apply diagonal_apply_ne
-      try symm ; assumption
-      try assumption
+      first | symm ; assumption | assumption
 
 /-- The `One` matrix is monomial.-/
 theorem monomial_one : Monomial (1 : Matrix n n F) := by
@@ -204,20 +200,17 @@ coerce to `Monomial` matrices. -/
 def MonomialGroup : Subgroup (GL n F) where
   carrier :=  {M : GL n F | Monomial (M : Matrix n n F) }
   mul_mem' := monomial_mul
-  inv_mem' := by intro M ; simp; have : Invertible (M.val) := M.invertible; apply monomial_inv_of_Monomial
+  inv_mem' := by intro M ; simp; have := M.invertible; apply monomial_inv_of_Monomial
   one_mem' := monomial_one
 
 /-- An element of the `MonomialGroup` coerce to a `Monomial` matrix.-/
 theorem monomial_of_monomialGroup (M : (MonomialGroup : Subgroup (GL n F)) ):
   Monomial (M.val : Matrix n n F) := M.2
 
-/--The group of diagonal matrices-/
+/--The `Subgroup` of diagonal matrices-/
 def DiagonalGroup :  Subgroup (GL n R) where
   carrier :=  {M : GL n R | ∃ d : n-> R, M.val = diagonal d}
-  mul_mem' := by
-    intro _ _ ⟨d₁, h₁'⟩ ⟨d₂, h₂'⟩
-    use d₁ * d₂
-    simp [h₁', h₂']
+  mul_mem' := fun ⟨d₁, h₁'⟩ ⟨d₂, h₂'⟩ ↦  ⟨d₁ * d₂, by simp [h₁', h₂'] ⟩
   inv_mem' := by
     intro M ⟨d, h⟩
     have : Invertible (M.val) := M.invertible
@@ -225,9 +218,7 @@ def DiagonalGroup :  Subgroup (GL n R) where
     have : Invertible d := invertibleOfDiagonalInvertible d
     use Invertible.invOf d
     simp [h, inv_diagonal]
-  one_mem' := by
-    use fun (_:n) => 1
-    exact diagonal_one
+  one_mem' := ⟨fun (_:n) => 1,diagonal_one⟩
 section Perm
 
 /-- `DiagonalGroup` is a subgroup of `MonomialGroup`.-/
@@ -244,21 +235,23 @@ section MonomialtoPerm
 
 /-- The permutation associed to a `Monomial` matrix seen as a function.-/
 noncomputable
-def Matrix.toPermFun {M : Matrix n n F} (hM : Monomial M) : n → n := fun j ↦ Classical.choose (hM.2 j).exists
+def Matrix.toPermFun {M : Matrix n n F} (hM : Monomial M) : n → n :=
+  fun j ↦ Classical.choose (hM.2 j).exists
 
-lemma coeff_eq_zero_of_neq_toPermFun {M : Matrix n n F} {hM : Monomial M} {i j: n} (h : i ≠ toPermFun hM j  ):
-    M i j =0 := no_other_line hM (Exists.choose_spec (hM.2 j).exists) i h
+lemma coeff_zero_of_index_neq_toPermFun {M : Matrix n n F} {hM : Monomial M} {i j: n}
+    (h : i ≠ toPermFun hM j  ): M i j =0 :=
+  no_other_line hM (Exists.choose_spec (hM.2 j).exists) i h
 
 --Maybe change the name ?
 lemma toPermFun_universal_property {M : Matrix n n F} (hM : Monomial M) {i j: n} (h : M i j ≠0 ):
     i = toPermFun hM j := by
   contrapose h
   simp
-  exact coeff_eq_zero_of_neq_toPermFun h
+  exact coeff_zero_of_index_neq_toPermFun h
 
-lemma zero_of_toPermFun {M : Matrix n n F} (hM : Monomial M) (j : n) : M (toPermFun hM j) j ≠  0 := by
-  rcases hM.2 j with ⟨_, hM₁, _⟩
-  simpa [← toPermFun_universal_property hM hM₁]
+lemma zero_of_toPermFun {M : Matrix n n F} (hM : Monomial M) (j : n) : M (toPermFun hM j) j ≠  0 :=
+  match hM.2 j with
+  | ⟨_, hM₁, _⟩ => by simpa [← toPermFun_universal_property hM hM₁]
 
 /--Explicit calculation of the product of two `Monomial` matrices.-/
 theorem monomial_mul'{M : Matrix n n F} {N : Matrix n n F} (hM :Monomial M) (hN : Monomial N) :
@@ -271,23 +264,23 @@ theorem monomial_mul'{M : Matrix n n F} {N : Matrix n n F} (hM :Monomial M) (hN 
       ext x
       simp
       intro h
-      simp [coeff_eq_zero_of_neq_toPermFun h]
+      simp [coeff_zero_of_index_neq_toPermFun h]
     simp [← h,← this]
   have: M i (toPermFun hN j) * N (toPermFun hN j) j =0 := by
     simp [h]
     rw [← ne_eq] at h
     left
-    apply coeff_eq_zero_of_neq_toPermFun h
+    apply coeff_zero_of_index_neq_toPermFun h
   rw [this]
   have: (fun _ ↦ (0:F)) = fun j_1 ↦ M i j_1 * N j_1 j := by
     ext x
     by_cases h' : x = toPermFun hN j
     · rw [h', this]
     rw [← ne_eq] at h'
-    simp [coeff_eq_zero_of_neq_toPermFun h']
+    simp [coeff_zero_of_index_neq_toPermFun h']
   simp [← this]
 
-/--Function `toPermGun` is multiplicative-/ -- to modify
+/--Function `toPermFun` is multiplicative-/
 theorem PermFun_mul {M : Matrix n n F} (hM : Monomial M) {N : Matrix n n F} (hN : Monomial N) :
     toPermFun (monomial_mul hM hN) = toPermFun hM  ∘ (toPermFun hN)  := by
   ext j
@@ -299,7 +292,7 @@ theorem PermFun_mul {M : Matrix n n F} (hM : Monomial M) {N : Matrix n n F} (hN 
   symm
   apply toPermFun_universal_property
   simp [toPermFun_universal_property hN hN₁] at hN₁ hM₁ ⊢
-  constructor <;> assumption
+  exact ⟨hM₁, hN₁⟩
 
 theorem one_permFun : id = toPermFun (monomial_one : Monomial (1: Matrix n n F))  := by
   ext j
@@ -415,9 +408,9 @@ theorem PermMatrixGroup_mem_iff (x : GL n R) :
 theorem PermMatrix_Hom'coe {f : Perm n} : (PermMatrix_Hom' f).val = (PermMatrix_Hom f : GL n F) := by
   simp [PermMatrix_Hom']
 
-@[simp] 
+@[simp]
 theorem PermMatrix_Homcoe {f:Perm n} : (PermMatrix_Hom f).val = (PermMatrix f: Matrix n n R) := by
-  simp [PermMatrix_Hom, _PermMatrix_Hom] 
+  simp [PermMatrix_Hom, _PermMatrix_Hom]
 
 
 theorem PermMatrix_le_MonomialGroup : PermMatrixGroup ≤ (MonomialGroup : Subgroup (GL n F)) := by
@@ -493,7 +486,7 @@ lemma trivial_inf_diagonalGroup_permMatrixGroup :
     have : x i j = 0 ∨ x i j =1 := by
       simp [← hf, PermMatrix_Hom, _PermMatrix_Hom, PermMatrix]
       tauto
-    have : ¬ x i j = 0 → x i j =1 := by 
+    have : ¬ x i j = 0 → x i j =1 := by
       intro h
       obtain h'|h' := this
       · exfalso
@@ -510,25 +503,25 @@ lemma trivial_inf_diagonalGroup_permMatrixGroup :
     apply noncancel_d_of_invertible_diagonal
   simp
 
-theorem permMatrixtoPermHom_inj : 
-    Function.Injective (toPermHom.restrict ((PermMatrixGroup : Subgroup (GL n F)).subgroupOf MonomialGroup )) := by 
+theorem permMatrixtoPermHom_inj :
+    Function.Injective (toPermHom.restrict ((PermMatrixGroup : Subgroup (GL n F)).subgroupOf MonomialGroup )) := by
   simp [← MonoidHom.ker_eq_bot_iff, ← diagonalGroup_is_ker_permMatrixGroup]
   rw [Subgroup.disjoint_def]
   intro x xdiag xPerm
   have : x ∈ (DiagonalGroup ⊓ PermMatrixGroup).subgroupOf (MonomialGroup : Subgroup (GL n F)):=by
-    simp [Subgroup.mem_subgroupOf] at xdiag xPerm ⊢ 
+    simp [Subgroup.mem_subgroupOf] at xdiag xPerm ⊢
     constructor <;> assumption
   simp [trivial_inf_diagonalGroup_permMatrixGroup] at this
   assumption
 
-theorem permMatrixtoPermHom_inj' {M N:MonomialGroup} (hM : M.val ∈ PermMatrixGroup) 
+theorem permMatrixtoPermHom_inj' {M N:MonomialGroup} (hM : M.val ∈ PermMatrixGroup)
     (hN : N.val ∈ (PermMatrixGroup : Subgroup (GL n F))) (hperm : toPermHom M = toPermHom N) : M=N:= by
   suffices (⟨M,hM⟩ : PermMatrixGroup.subgroupOf MonomialGroup) = ⟨N,hN⟩ by
     simp at this
     assumption
-  have : ∀P : (MonomialGroup : Subgroup (GL n F)), (h : P.val ∈ PermMatrixGroup) → 
+  have : ∀P : (MonomialGroup : Subgroup (GL n F)), (h : P.val ∈ PermMatrixGroup) →
       toPermHom.restrict (PermMatrixGroup.subgroupOf MonomialGroup) ⟨P,h⟩ = toPermHom P := by simp
-  rw [← this N hN, ← this M hM] at hperm 
+  rw [← this N hN, ← this M hM] at hperm
   apply permMatrixtoPermHom_inj hperm
 
 
@@ -565,7 +558,7 @@ theorem monomial_decomposition' (M:(MonomialGroup : Subgroup (GL n F))) :
     intro f
     calc
       toPermHom ((Subgroup.inclusion PermMatrix_le_MonomialGroup) (PermMatrix_Hom' f ))
-          = (toPermHom ∘ (Subgroup.inclusion PermMatrix_le_MonomialGroup) ∘ PermMatrix_Hom') f 
+          = (toPermHom ∘ (Subgroup.inclusion PermMatrix_le_MonomialGroup) ∘ PermMatrix_Hom') f
               := by simp ; rfl
       _   = f := by rw [permMatrixGroup_sect] ; simp
   have: D ∈ (DiagonalGroup.subgroupOf MonomialGroup) :=
@@ -575,34 +568,34 @@ theorem monomial_decomposition' (M:(MonomialGroup : Subgroup (GL n F))) :
   apply Subgroup.subtype_injective -- most wonderfull lemma ever
   simp [D,P]
 
-theorem monomial_decomposition_unique 
-    {P P' : (PermMatrixGroup : Subgroup (GL n F))} 
+theorem monomial_decomposition_unique
+    {P P' : (PermMatrixGroup : Subgroup (GL n F))}
       {D D' : DiagonalGroup} (h:P.val * D.val = P'.val*D'.val): P=P' ∧ D=D':= by
-  have : P'.val⁻¹ * P.val =D'.val* D.val⁻¹ := by 
+  have : P'.val⁻¹ * P.val =D'.val* D.val⁻¹ := by
     rw [← mul_inv_cancel_right P.val D.val, h]
     group
   let I : MonomialGroup :=
     ⟨(P'⁻¹ * P).val, Subgroup.inclusion.proof_1 PermMatrix_le_MonomialGroup (P'⁻¹ * P)⟩ ;
-  have Iker: 
-    (toPermHom : (MonomialGroup : Subgroup (GL n F))→* Perm n) I  = (1 : Perm n):=by 
+  have Iker:
+    (toPermHom : (MonomialGroup : Subgroup (GL n F))→* Perm n) I  = (1 : Perm n):=by
     simp [I, this,← MonoidHom.mem_ker, ← diagonalGroup_is_ker_permMatrixGroup, mem_subgroupOf]
     exact DiagonalGroup.mul_mem D'.2 <| DiagonalGroup.inv_mem D.2
   have : I = 1 :=by
-    apply permMatrixtoPermHom_inj' 
-    simp [I,PermMatrixGroup.mul_mem, PermMatrixGroup.one_mem] 
-    exact PermMatrixGroup.one_mem 
-    simp [Iker]  
-  have : P =P' := 
-    have : P'⁻¹ * P = 1 := by 
-      apply subtype_injective PermMatrixGroup 
+    apply permMatrixtoPermHom_inj'
+    simp [I,PermMatrixGroup.mul_mem, PermMatrixGroup.one_mem]
+    exact PermMatrixGroup.one_mem
+    simp [Iker]
+  have : P =P' :=
+    have : P'⁻¹ * P = 1 := by
+      apply subtype_injective PermMatrixGroup
       simp [I] at this
-      simp [this] 
+      simp [this]
     calc
       P = P'*P'⁻¹*P := by group
-      _ = P':= by rw [mul_assoc,this, mul_one] 
-  apply And.intro this 
-  simp [this] at h; 
-  exact h 
+      _ = P':= by rw [mul_assoc,this, mul_one]
+  apply And.intro this
+  simp [this] at h;
+  exact h
 
 end PermtoMonomial
 
