@@ -17,6 +17,15 @@ lemma set_mul_assoc (r s t : Set G): r * s * t = r * (s*t) := by
   ext
   simp [mul_assoc]
 
+lemma Set.mul_of_mul_image_of_MulHom (M N : Type u_11) [Mul M] [Mul N] {f : M→ₙ* N} {s t : Set M} : 
+    f '' (s * t) = f '' s * (f '' t):=by
+  ext
+  simp [Set.mem_mul] 
+
+lemma Set.mul_of_mul_image_of_MulEquiv {M N : Type u_11} [Mul M] [Mul N] (f : M≃* N) (s t : Set M) : 
+    f '' (s * t) = f '' s * (f '' t):=by
+  ext
+  simp [Set.mem_mul] 
 theorem doubleCoset_one : DoubleCoset B 1 = B.carrier := by
   simp [DoubleCoset]
   ext x
@@ -35,6 +44,52 @@ theorem doubleCoset_quotient {w w' : G} (a a' : B) (h : w = a*w'*a') :
     ⟨ b*a⁻¹, B.mul_mem binB (B.inv_mem a.2), a'⁻¹ *b', B.mul_mem (B.inv_mem a'.2) b'inB,
       by simp [← h] ;group ⟩
 
+--Double coset C B w = BwB
+theorem DoubleCoset.self_mem {w : G} : w ∈ C B w:= by
+  simp [DoubleCoset]
+  exact ⟨1, B.one_mem, 1, B.one_mem, by simp⟩
+
+lemma DoubleCoset.sub_of_gen_mem {w w' :G} (h : w ∈ C B w') : C B w ⊆ C B w':=by
+  intro x h'
+  simp [DoubleCoset] at *
+  rcases h' with ⟨b,binB,b',b'inB, hx⟩
+  rcases h with ⟨a,ainB,a',a'inB, hw⟩
+  exact ⟨b*a, B.mul_mem binB ainB, a'*b', B.mul_mem a'inB b'inB, by simp [← hx, ← hw] ; group ⟩
+
+
+theorem DoubleCoset.disjoint_of_neq (w w' :G) (h : C B w ≠ C B w') : Disjoint (C B w) (C B w') := by
+  revert h
+  contrapose!
+  intro h
+  simp [DoubleCoset, Set.not_disjoint_iff] at h
+  rcases h with ⟨b1,b1inB,b1',b1'inB, b2, b2inB, b2', b2'inB, h⟩
+  apply subset_antisymm
+  · apply sub_of_gen_mem
+    simp [DoubleCoset]
+    have :w = b1⁻¹ * b2* w' * (b2' * b1'⁻¹) :=
+    calc
+      w = b1⁻¹ * (b1 *w * b1') * b1'⁻¹ := by group
+      _ = b1⁻¹  * b2 * w' * (b2' * b1'⁻¹) := by simp [← h] ; group
+    exact
+    ⟨b1⁻¹ * b2, B.mul_mem (B.inv_mem b1inB) b2inB, b2'*b1'⁻¹, B.mul_mem b2'inB (B.inv_mem b1'inB),this.symm⟩
+  · apply sub_of_gen_mem
+    simp [DoubleCoset]
+    have :w' = b2⁻¹ * b1 * w * (b1' * b2'⁻¹) :=
+    calc
+      w' = b2⁻¹ * (b2 *w' * b2') * b2'⁻¹ := by group
+      _ = b2⁻¹  * b1 * w * (b1' * b2'⁻¹) := by simp [h] ; group
+    exact
+    ⟨b2⁻¹ * b1, B.mul_mem (B.inv_mem b2inB) b1inB, b1'*b2'⁻¹, B.mul_mem b1'inB (B.inv_mem b2'inB),this.symm⟩
+
+theorem DoubleCoset.eq_of_gen_mem {w w' :G} (h : w ∈ C B w') : C B w = C B w':=by
+  have h' := disjoint_of_neq B w w'
+  by_contra h₀
+  apply Set.disjoint_right.mp (h' h₀) h
+  simp [DoubleCoset]
+  exact ⟨1,B.one_mem, 1, B.one_mem, by simp⟩
+
+
+
 theorem DoubleCoset.mul_apply (w w' :G) : (C B w) * (C B w') = {(b.1  * w * b.2.1 * w' * b.2.2 :G)| b : (B × B × B)} := by
   ext
   simp [DoubleCoset, Set.mem_mul]
@@ -46,11 +101,7 @@ theorem DoubleCoset.mul_apply (w w' :G) : (C B w) * (C B w') = {(b.1  * w * b.2.
     rw [← h]
     group
   intro ⟨b, binB, b',b'inB, b'',b''inB, h⟩
-  use b ; apply And.intro binB
-  use b' ; apply And.intro b'inB
-  use 1 ; apply And.intro B.one_mem
-  use b'' ; apply And.intro b''inB
-  rw [← h] ; group
+  exact ⟨b, binB, b', b'inB, 1, B.one_mem, b'', b''inB,by rw [← h] ; group ⟩
 
 theorem DoubleCoset.mul_one (w : G) : (DoubleCoset B w) * (DoubleCoset B 1) = DoubleCoset B w  :=by
   rw [mul_apply]

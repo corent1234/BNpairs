@@ -428,26 +428,28 @@ theorem PermMatrix_le_MonomialGroup : PermMatrixGroup ≤ (MonomialGroup : Subgr
   use f j
   simp [PermMatrix, PermMatrix_Hom, _PermMatrix_Hom]
 
+/--The groupe homomorphism form `Perm n` to `MonomialGroup`.-/
+noncomputable
+def Matrix.PermMatrix_Hom_to_Monomial: Perm n →* (MonomialGroup : Subgroup (GL n F)):=
+  (Subgroup.inclusion PermMatrix_le_MonomialGroup).comp PermMatrix_Hom'
+
+
 /-- `toPermHom` is a right section of `PermMatrix_Hom'`.-/
 theorem permMatrixGroup_sect :
-    toPermHom ∘ Subgroup.inclusion (PermMatrix_le_MonomialGroup :  PermMatrixGroup ≤ (MonomialGroup : Subgroup (GL n F)))
-      ∘ PermMatrix_Hom'=  MonoidHom.id (Perm n) := by
+  toPermHom ∘ (PermMatrix_Hom_to_Monomial : Perm n→* (MonomialGroup : Subgroup (GL n F))) =
+      MonoidHom.id (Perm n) := by
   ext f j
   symm
   apply toPermFun_universal_property
   apply monomial_of_monomialGroup
   simp[PermMatrix_Hom']
-  simp [PermMatrix_Hom, _PermMatrix_Hom, PermMatrix]
+  simp [PermMatrix_Hom_to_Monomial,PermMatrix_Hom, _PermMatrix_Hom, PermMatrix]
 
-theorem permMatrixGroup_sect' (n : Type*) [DecidableEq n] [Fintype n] (F : Type u_3) [Field F] [DecidableEq F]:
-    (toPermHom ∘ Subgroup.inclusion (PermMatrix_le_MonomialGroup :  PermMatrixGroup ≤ (MonomialGroup : Subgroup (GL n F))))
-       ∘ PermMatrix_Hom'=  MonoidHom.id (Perm n) := by
-  ext f j
-  symm
-  apply toPermFun_universal_property
-  apply monomial_of_monomialGroup
-  simp[PermMatrix_Hom']
-  simp [PermMatrix_Hom, _PermMatrix_Hom, PermMatrix]
+theorem permMatrixGroup_sect' (f : Perm n): 
+    toPermHom (PermMatrix_Hom_to_Monomial f : (MonomialGroup : Subgroup (GL n F))) = f := by
+  calc
+    toPermHom (PermMatrix_Hom_to_Monomial f) = (toPermHom ∘ PermMatrix_Hom_to_Monomial) f := rfl
+    _ = f := by rw [permMatrixGroup_sect, MonoidHom.id_apply]
 
 
 theorem diagonalGroup_is_ker_permMatrixGroup :
@@ -533,40 +535,40 @@ theorem monomial_decomposition (M : MonomialGroup) :
   use P
   simp at D ⊢
   use D
+  have: D ∈ (DiagonalGroup.subgroupOf MonomialGroup) :=by
+    simp [diagonalGroup_is_ker_permMatrixGroup, MonoidHom.mem_ker, D, P]
+    calc
+      (toPermHom ((inclusion PermMatrix_le_MonomialGroup) (PermMatrix_Hom' (toPermHom M))))⁻¹
+          * toPermHom M
+        = ((toPermHom.comp ((Subgroup.inclusion (PermMatrix_le_MonomialGroup : PermMatrixGroup ≤  (MonomialGroup : Subgroup (GL n F)))).comp PermMatrix_Hom')) (toPermHom M))⁻¹ 
+          * toPermHom M := by simp
+      _ = (toPermHom.comp PermMatrix_Hom_to_Monomial (toPermHom M))⁻¹ * (toPermHom M) := by simp [PermMatrix_Hom_to_Monomial] ; rfl
+      _ = ((toPermHom ∘ PermMatrix_Hom_to_Monomial) (toPermHom M))⁻¹ * (toPermHom M) := by rfl 
+      _ = 1 := by rw [permMatrixGroup_sect] ;  simp
   constructor
-  · have : ∀ f : Perm n,
-    toPermHom (Subgroup.inclusion (PermMatrix_le_MonomialGroup :  PermMatrixGroup ≤ (MonomialGroup : Subgroup (GL n F))) (PermMatrix_Hom' f)) = f := by
-      intro f
-      calc
-        toPermHom ((Subgroup.inclusion PermMatrix_le_MonomialGroup) (PermMatrix_Hom' f ))
-          = (toPermHom ∘ (Subgroup.inclusion PermMatrix_le_MonomialGroup) ∘ PermMatrix_Hom') f := by simp ; rfl
-        _ = f := by rw [permMatrixGroup_sect] ; simp
-    have: D ∈ (DiagonalGroup.subgroupOf MonomialGroup) :=
-      by simp [diagonalGroup_is_ker_permMatrixGroup, MonoidHom.mem_ker, D, P, this]
-    rw [Subgroup.mem_subgroupOf] at this
-    assumption
-  simp [D]
+  · exact Subgroup.mem_subgroupOf.mp this
+  · simp [D]
 
 theorem monomial_decomposition' (M:(MonomialGroup : Subgroup (GL n F))) :
-    ∃ D : DiagonalGroup, M = Subgroup.inclusion PermMatrix_le_MonomialGroup (PermMatrix_Hom' (toPermHom M)) *
+    ∃ D : DiagonalGroup, M = (PermMatrix_Hom_to_Monomial (toPermHom M)) *
       (Subgroup.inclusion diagonalGroup_le_monomialGroup D) := by
   let P : (PermMatrixGroup : Subgroup (GL n F)) := (PermMatrix_Hom' ∘ toPermHom) M
   let D : MonomialGroup := (Subgroup.inclusion PermMatrix_le_MonomialGroup P⁻¹) * M
 
-  have : ∀ f : Perm n,
-      toPermHom (Subgroup.inclusion (PermMatrix_le_MonomialGroup :  PermMatrixGroup ≤ (MonomialGroup : Subgroup (GL n F))) (PermMatrix_Hom' f)) = f := by
-    intro f
+  have: D ∈ (DiagonalGroup.subgroupOf MonomialGroup) :=by
+    simp [diagonalGroup_is_ker_permMatrixGroup, MonoidHom.mem_ker, D, P]
     calc
-      toPermHom ((Subgroup.inclusion PermMatrix_le_MonomialGroup) (PermMatrix_Hom' f ))
-          = (toPermHom ∘ (Subgroup.inclusion PermMatrix_le_MonomialGroup) ∘ PermMatrix_Hom') f
-              := by simp ; rfl
-      _   = f := by rw [permMatrixGroup_sect] ; simp
-  have: D ∈ (DiagonalGroup.subgroupOf MonomialGroup) :=
-    by simp [diagonalGroup_is_ker_permMatrixGroup, MonoidHom.mem_ker, D, P, this]
+      (toPermHom ((inclusion PermMatrix_le_MonomialGroup) (PermMatrix_Hom' (toPermHom M))))⁻¹
+          * toPermHom M
+        = ((toPermHom.comp ((Subgroup.inclusion (PermMatrix_le_MonomialGroup : PermMatrixGroup ≤  (MonomialGroup : Subgroup (GL n F)))).comp PermMatrix_Hom')) (toPermHom M))⁻¹ 
+          * toPermHom M := by simp
+      _ = (toPermHom.comp PermMatrix_Hom_to_Monomial (toPermHom M))⁻¹ * (toPermHom M) := by simp [PermMatrix_Hom_to_Monomial] ; rfl
+      _ = ((toPermHom ∘ PermMatrix_Hom_to_Monomial) (toPermHom M))⁻¹ * (toPermHom M) := by rfl 
+      _ = 1 := by rw [permMatrixGroup_sect] ;  simp
   rw [Subgroup.mem_subgroupOf] at this
   use ⟨D,this⟩
   apply Subgroup.subtype_injective -- most wonderfull lemma ever
-  simp [D,P]
+  simp [D,P, PermMatrix_Hom_to_Monomial]
 
 theorem monomial_decomposition_unique
     {P P' : (PermMatrixGroup : Subgroup (GL n F))}

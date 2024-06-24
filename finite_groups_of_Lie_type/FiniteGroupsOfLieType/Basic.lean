@@ -10,6 +10,7 @@ import Mathlib.GroupTheory.QuotientGroup
 import Mathlib.GroupTheory.Coxeter.Basic
 import Mathlib.Tactic.Group
 import FiniteGroupsOfLieType.DoubleCosets
+import Mathlib.GroupTheory.Coxeter.Length
 
 open Subgroup
 open scoped Pointwise
@@ -36,12 +37,54 @@ structure BNMphiQuadruplet (G : Type*) [Group G] (A : Type*) where
   /-- For all  ni ∈ N that maps to one of the generators of the Coxeter group B/(B∩N) and n∈N,
   niBn ⊆ Bn niB ∪ BnB-/
   prop5 :  ∀ (n ni : N) (i : A), phi ni = M.simple i ->
-            {ni * b.val * n | b : B} ⊆  DoubleCoset B (n * ni) ∪ DoubleCoset B n
+            {ni * b.val * n | b : B} ⊆  DoubleCoset B (ni * n) ∪ DoubleCoset B n
+
+variable (TS : (BNMphiQuadruplet G A))
+section
+
+variable (B : Subgroup G) {N : Subgroup G} {M : CoxeterMatrix A} {phi : N →* M.Group}
+variable (hsurj : Function.Surjective phi) (hker : phi.ker = B.subgroupOf N)
+open Set
+/--For `w : G` and a subgroup `B` of `G`, wBw⁻¹ si endowed with a group structure. -/
+def ConjugatedSubgroup (w: G) (B : Subgroup G): Subgroup G where
+  carrier := {w} * B.carrier * {w⁻¹}
+  mul_mem' := by
+    simp
+    intro _ _ ha hb
+    have := B.mul_mem ha hb
+    group at this ⊢
+    assumption
+  inv_mem' := by
+    simp
+    intro _ h
+    have  := B.inv_mem h
+    group at this ⊢
+    assumption
+  one_mem' := ⟨w*1, mem_mul.mpr ⟨w, mem_singleton w,1, B.one_mem, rfl⟩,w⁻¹, mem_singleton w⁻¹, by simp⟩
 
 
+lemma prop5_iff (n : N) (i : A) : (∀ (ni : N), phi ni = M.simple i ->
+    {ni * b.val * n | b : B} ⊆  DoubleCoset B (ni * n) ∪ DoubleCoset B n)  ↔
+      (∃ (ni : N), phi ni = M.simple i ∧
+        {ni * b.val * n | b : B} ⊆  DoubleCoset B (ni * n) ∪ DoubleCoset B n ) :=
+  Iff.intro (fun h => match hsurj (M.simple i) with |⟨ni,hni⟩ => ⟨ni, hni,h ni hni⟩)
+    fun ⟨ni0, hni0,h0⟩ ni hni x ⟨b,hb⟩ =>
+      have : ni0⁻¹ * ni  ∈ B.subgroupOf N:= by simp [← hker,phi.mem_ker, hni0,hni]
+      let bi : B := ⟨ni0⁻¹ *ni, this⟩
+      have : x ∈ { x | ∃ b:B, ni0.val * b.val * ↑n = x } := ⟨bi*b, by simp [← hb, bi]; group ⟩
+    Or.elim (h0 this)
+      (fun h => Or.inl
+        (have : ni0 * ni⁻¹ ∈ B.subgroupOf N:= by simp [← hker,phi.mem_ker, hni0,hni]
+        let bi2 : B := ⟨ ni0*ni⁻¹,this ⟩
+        have : bi2.val * (ni * n) * 1 = ni0 * n :=by simp ; group
+        by rw [← doubleCoset_quotient B bi2 1 this.symm] ; assumption))
+      fun h => Or.inr h
+
+
+end
 section Quotient
 
-variable (TS : (BNMphiQuadruplet G A)) {G' : Type*} [Group  G']
+variable {G' : Type*} [Group  G']
 
 open Function
 open MonoidHom
@@ -269,55 +312,221 @@ def QuotientBNMphiQuadruplet' : BNMphiQuadruplet (G ⧸ Z) A :=
 end Quotient
 
 section DoubleCoset
-
+open CoxeterSystem
 variable (TS : (BNMphiQuadruplet G A)) {G' : Type*} [Group  G']
 
-/-
+/--The union of all the double Cosets-/
 def  BWB :Subgroup G where
   carrier := TS.B *  TS.N * TS.B
-  one_mem' := sorry
+
+  one_mem' := mul_one (1:G) ▸ mul_one (1*1 : G) ▸
+    Set.mul_mem_mul (Set.mul_mem_mul TS.B.one_mem TS.N.one_mem) TS.B.one_mem
+
+  inv_mem' :=by
+    intro x ⟨bn,⟨b,binB,n,ninN, h₀⟩,b',b'inB,h⟩
+    simp [← h, ← h₀, ← mul_assoc]
+    apply Set.mul_mem_mul
+    apply Set.mul_mem_mul
+    all_goals
+      {simp [binB, ninN, b'inB] ; first | exact binB | exact ninN | exact b'inB}
+
   mul_mem' := sorry
-  inv_mem' := sorry
+
+/-mathlib?-/
+
+lemma Set.subset_mul_one_mem {s t :Set G} (one_mem : 1 ∈ t) : s ⊆ s*t :=
+  fun x xins ↦ Set.mem_mul.mpr ⟨x,xins,1,one_mem, mul_one x⟩
+
+lemma Set.subset_one_mem_mul {s t :Set G} (one_mem : 1 ∈ t) : s ⊆ t*s :=
+  fun x xins ↦ Set.mem_mul.mpr ⟨1,one_mem, x, xins, one_mul x⟩
 
 theorem groupDecomp : ⊤ = BWB TS := by
   apply le_antisymm
   · rw [TS.prop1]
     apply sup_le
-    · simp [BWB]
-      intros
-      apply set_mul_le_mem_one
-      simp [set_mul]
-      use 1; simp ; exact ⟨TS.N.one_mem, TS.B.one_mem⟩
-    simp [BWB]
-    intro x h
-    simp
-    apply set_mul_le_one_mem TS.B.one_mem <| set_mul_le_mem_one TS.B.one_mem h
+    · exact fun _ xinB =>
+        Set.subset_mul_one_mem TS.B.one_mem <| Set.subset_mul_one_mem TS.N.one_mem xinB
+    · exact fun _ h => Set.subset_mul_one_mem TS.B.one_mem <| Set.subset_one_mem_mul TS.B.one_mem h
   simp
 
-
+/--The map that maps a element n ∈ TS.N to its associated double coset BnB.-/
 def f (n : TS.N) : Set G := C TS.B n
-lemma yes : ∀ m n : TS.N, QuotientGroup.con (TS.phi.ker) m n → f TS m = f TS n  :=by
+
+lemma liftablef : ∀ m n : TS.N, QuotientGroup.con (TS.phi.ker) m n → f TS m = f TS n :=by
   intro m n h
-  simp [QuotientGroup.con,QuotientGroup.leftRel_apply]  at h
+  simp [QuotientGroup.con,QuotientGroup.leftRel_apply] at h
   simp [f]
-  have : m.val = (1 :TS.B).val * n.val * ( n⁻¹*m).val :=by sorry
-  apply doubleCoset_quotient TS.B this (1:TS.B) ((m⁻¹ *n)⁻¹) this
+  have : (n⁻¹ * m).val ∈ TS.B:=by
+    apply mem_subgroupOf.mp
+    rw [← TS.prop3]
+    suffices h' : n⁻¹ *m = (m⁻¹ *n)⁻¹ by rw [ h']; exact TS.phi.ker.inv_mem h
+    group
+  let a' : TS.B := ⟨n⁻¹ * m, this ⟩
+  have : m.val = (1 :TS.B).val * n.val * ( n⁻¹*m).val :=by simp
+  apply doubleCoset_quotient TS.B (1:TS.B)  a' this
 
+/--The quotient map that from the Weyl group N/ker phi to the Sets of G.-/
+def f' : TS.N ⧸ TS.phi.ker → Set G := Quotient.lift (f TS) (liftablef TS)
 
+lemma f'comm_Quotientgroupmk (n : TS.N) : f' TS (QuotientGroup.mk' TS.phi.ker n) = f TS n :=by
+  simp [f']
+  have : (QuotientGroup.mk : TS.N → TS.N ⧸ TS.phi.ker) = Quotient.mk'' :=by
+    ext x
+    have : (↑x : TS.N ⧸ TS.phi.ker)  = Quotient.mk'' x  := by simp
+    rw [this]
+  rw [this, Quotient.mk'']
 
-def g : TS.N ⧸ TS.phi.ker → Set G := Quotient.lift (f TS) (yes TS)
-/-
+lemma f'comm_Quotientgroupmk' (n : TS.N) : f' TS (↑n : TS.N ⧸ TS.phi.ker) = f TS n :=by
+  rw [← f'comm_Quotientgroupmk]
+  rfl
+
+lemma f'comm_Quotientgroupmk'' (n : TS.N) : f' TS (Quotient.mk'' n) = f TS n :=by
+  simp [Quotient.mk'', f']
+
+lemma quot_surj (w : TS.N ⧸ TS.phi.ker) : ∃ u : TS.N, w = Quotient.mk'' u :=
+  match QuotientGroup.mk'_surjective TS.phi.ker w with
+  | ⟨u,h⟩ => ⟨u, by simp [← h]⟩
+
+lemma quot_apply (u : TS.N) : Quotient.mk'' u = (↑u : TS.N ⧸ TS.phi.ker):=by simp
+
+lemma f'apply (w: TS.N ⧸ TS.phi.ker) : ∃ u ∈ TS.N, f' TS w = C TS.B u :=
+  match QuotientGroup.mk'_surjective TS.phi.ker w with
+  |⟨u,h⟩ => ⟨u,by simp [← h, f'comm_Quotientgroupmk', f]⟩
+
+lemma f'one : f' TS 1 = TS.B.carrier :=by
+  simp [← QuotientGroup.mk_one, f'comm_Quotientgroupmk', f,← doubleCoset_one]
+
+lemma phikerLift_isom : Function.Bijective (QuotientGroup.kerLift TS.phi):=
+  And.intro
+    (QuotientGroup.kerLift_injective TS.phi)
+    fun y => match TS.prop2 y with |⟨u,h⟩ => ⟨QuotientGroup.mk' TS.phi.ker u, by simp [h] ⟩
+
+/--The `CoxeterSystem` from N/ker phi to M.Group-/
 noncomputable
-def  doubleCoset_Coexter_equiv : TS.M.Group ≃ {C TS.B w | w∈ N} where
-  toFun :=
--/
+def  cst : CoxeterSystem TS.M (TS.N ⧸ TS.phi.ker) where
+  mulEquiv := MulEquiv.ofBijective (QuotientGroup.kerLift TS.phi) (phikerLift_isom TS)
+
+lemma f'_inj_init {w w' : TS.N ⧸ TS.phi.ker} (w_neq_w' : w ≠ w') (hq :(cst TS).length w'=0):
+    f' TS w ≠ f' TS w' :=by
+  let cs : CoxeterSystem TS.M (TS.N ⧸ TS.phi.ker) := cst TS
+  rw [(length_eq_zero_iff cs).mp hq] at w_neq_w' ⊢
+  rcases quot_surj TS w with ⟨u,hu⟩
+  simp [f'one, hu]
+  suffices u.val ∉ TS.B.carrier by
+    intro h
+    apply this
+    rw [← h]
+    exact ⟨1, by simp⟩
+  by_contra h
+  apply w_neq_w'
+  rwa [hu, QuotientGroup.eq_one_iff, TS.prop3, mem_subgroupOf, ←Subgroup.mem_carrier]
+
+lemma czlihvevh {s₀ w₀ w'₀ : TS.N} (hdis:Disjoint (C TS.B (↑s₀ * ↑w'₀)) (C TS.B ↑s₀ * C TS.B ↑w₀)):
+    C TS.B ↑w₀ ≠ C TS.B ↑w'₀ := by
+  revert hdis
+  contrapose!
+  intro h
+  rw [h]
+  apply Set.not_disjoint_iff.mpr
+  use s₀*w'₀
+  apply And.intro (DoubleCoset.self_mem TS.B)
+  simp [DoubleCoset.mul_apply]
+  exact ⟨1, TS.B.one_mem,1, TS.B.one_mem,1, TS.B.one_mem,by simp⟩
 
 
+lemma apply_left_descent {w' : TS.N ⧸ TS.phi.ker} {q : Nat} (h: (cst TS).length w' = q + 1) :
+    ∃ i :A, (cst TS).length ((cst TS).simple i * w') = q  := by
+  have : w'  ≠ 1 := by
+    intro h'
+    rw [(CoxeterSystem.length_eq_zero_iff (cst TS)).mpr h' ] at h
+    contradiction
+  rcases CoxeterSystem.exists_leftDescent_of_ne_one (cst TS) this with ⟨i,hi⟩
+  use i
+  simp [IsLeftDescent] at hi
+  obtain h'|h' := CoxeterSystem.length_simple_mul (cst TS) w' i
+  · rw [h'] at hi
+    simp at hi
+  · apply add_right_cancel
+    rw [← h,h']
 
+lemma gotαfindaname {s₀ w₀ w'₀ :TS.N} (i:A) (hs : QuotientGroup.mk' TS.phi.ker s₀ =  (cst TS).simple i)
+    (h : C TS.B w₀ ≠ C TS.B (s₀  * w'₀) ∧ C TS.B (s₀ * w₀) ≠ C TS.B (s₀ * w'₀ )) :
+      Disjoint (C TS.B (s₀ * w'₀)) (C TS.B s₀* (C TS.B w₀)) :=by
+  apply Set.disjoint_of_subset_right
+  · apply (prop4_doubleCoset_iff TS.B s₀ w₀).mp
+    rw [Set.union_comm]
+    apply TS.prop5 w₀ s₀ i
+    have : TS.phi s₀ = (cst TS).mulEquiv (QuotientGroup.mk' TS.phi.ker s₀):= by simp [cst]
+    simp [this,hs, ← CoxeterSystem.map_simple, CoxeterSystem.simple, CoxeterMatrix.simple]
+  apply Set.disjoint_union_right.mpr
+  constructor
+  on_goal 1 =>apply (DoubleCoset.disjoint_of_neq TS.B (s₀ * w'₀) w₀)
+  on_goal 2 =>apply (DoubleCoset.disjoint_of_neq TS.B (s₀ * w'₀) (s₀ *w₀))
+  all_goals {symm ; simp [ne_eq] ; first |exact h.2 | exact h.1}
 
--/
+lemma mamamia {s w : TS.N ⧸ TS.phi.ker } {q : Nat} (i:A) (hsi : s = (cst TS).simple i)
+    (hlength : (cst TS).length w ≥ q +1 ) : (cst TS).length (s*w) ≥ q :=
+    let cs :=cst TS
+    ge_trans (Or.elim (CoxeterSystem.length_simple_mul cs w i)
+                (fun h => by simp [hsi,h]; linarith)
+                  fun h => by simp [hsi,h]; linarith)
+      (by rfl)
 
+lemma f'_inj (q:Nat):
+  ∀ {w w' : TS.N ⧸ TS.phi.ker},  (w_neq_w' : w ≠ w') → (hq :(cst TS).length w'=q) →
+    (hlength : (cst TS).length w ≥ q) → f' TS w ≠ f' TS w':=by
+  let cs : CoxeterSystem TS.M (TS.N ⧸ TS.phi.ker) := cst TS
+  induction' q with q Aq
+  · intro w w' w_neq_w' hq _
+    exact f'_inj_init TS w_neq_w' hq
 
+  intro w w' w_neq_w' hq hlength
+  rcases apply_left_descent TS hq with ⟨i,hsw'⟩
+
+  let s := cs.simple i
+
+  have : cs.length w > cs.length (s*w'):= gt_of_ge_of_gt hlength (by simp [s,← hsw'])
+  have wneqsw': w ≠ s*w' := fun h => by rw [h] at this ; apply ne_of_gt this; rfl
+  have swneqsw': s * w ≠ s * w' := by simpa
+  have : f' TS w ≠ f' TS (s*w') ∧ f' TS (s*w) ≠ f' TS (s*w'):=
+    And.intro (Aq  wneqsw' hsw' (le_trans (by simp) hlength))
+      (Aq  swneqsw' hsw' (mamamia TS i (by simp [s, cs]) hlength))
+  rcases QuotientGroup.mk'_surjective TS.phi.ker w with ⟨w₀, hw⟩
+  rcases QuotientGroup.mk'_surjective TS.phi.ker w' with ⟨w'₀, hw'⟩
+  rcases QuotientGroup.mk'_surjective TS.phi.ker s with ⟨s₀, hs⟩
+  simp [← hw', ← hw, ← hs, f'comm_Quotientgroupmk', f] at this ⊢
+  repeat rw [← QuotientGroup.mk_mul, f'comm_Quotientgroupmk',f] at this
+  exact czlihvevh TS <| gotαfindaname TS i (by simp [s,cs,hs]) this
+
+lemma f'_inj' : Function.Injective (f' TS) := by
+  intro w w' h
+  let cs := cst TS
+  by_contra! w_neq_w'
+  exact Or.elim (Nat.le_or_le (cs.length w) (cs.length w'))
+    (fun hlength => f'_inj TS (cs.length w) w_neq_w'.symm rfl hlength h.symm)
+    (fun hlength => f'_inj TS (cs.length w') w_neq_w' rfl hlength h)
+
+/--The bijection between the Weyl group of the BNMphiQuadruplet and it simage (the set of double Cosets), see `Weyl_doubleCosets_equiv'`.-/
+noncomputable
+def Weyl_doubleCosets_equiv : TS.N ⧸ TS.phi.ker ≃ Set.range (f' TS) :=
+    Equiv.ofInjective (f' TS) (f'_inj' TS)
+
+lemma f'range_eq_doubleCosets : Set.range (f' TS) = {C TS.B w | w : TS.N} :=by
+  ext Cw
+  simp [Set.mem_range]
+  constructor
+  · intro ⟨w, h ⟩
+    rcases f'apply TS w with ⟨w₀ ,w₀inN,hw₀⟩
+    use w₀
+    simp [w₀inN, ← hw₀,h]
+  · intro ⟨w₀, w₀inN,hw₀⟩
+    use QuotientGroup.mk' TS.phi.ker ⟨w₀, w₀inN⟩
+    simp [f'comm_Quotientgroupmk',f,hw₀]
+
+/--The bijection between the Weyl group of the BNMphiQuadruplet and the set of double Cosets.-/
+noncomputable
+def Weyl_doubleCosets_equiv' : TS.N ⧸ TS.phi.ker ≃  {C TS.B w | w : TS.N} :=
+    f'range_eq_doubleCosets TS ▸ Weyl_doubleCosets_equiv TS
 
 end DoubleCoset
 
