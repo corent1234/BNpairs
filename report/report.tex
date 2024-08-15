@@ -1,0 +1,33 @@
+\documentclass[a4paper,twoside,11pt]{article}
+
+\include{preamble.tex}
+\addbibresource{biblio.bib}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\title{Formalization of finite groups of Lie Type}
+
+\newcommand*\MapsTo{%
+    \to%\raisebox{-0.2em}{\xrightarrow{{\resizebox{1em}{0.3em}{$\sim$}}} }:w
+}
+
+\newcommand\tododeux[1]{\color{red} #1} %to put todos without float losts
+\newcommand\Lean{L$\exists\forall$N }
+\newcommand\CFSG{CFSG }
+\begin{document}
+    \listoftodos 
+    %only for the first page
+    %\include{firstpage.tex}
+
+    %two little sum ups (french +english) + intro
+    %\include{intro.tex}
+    
+    %The main content
+    \include{content.tex}
+
+    %The conclusions
+
+    %\include{conclusion.tex}
+    
+    \appendix
+
+    %\include{annex.tex}
+\end{document}

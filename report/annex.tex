@@ -1,0 +1,25 @@
+\section{Complement on \Lean}%
+\label{sec:ComplementLean}
+
+
+\section{Recall on group theory}
+
+\subsection{Group presentation}
+\label{sub:presentation}
+
+Let $S$ be a set.
+\begin{definition}[Free group]
+    A \emph{free group} over $S$ is a group $F$ with a map $\iota : S \to  F$ that verifies the follows universal property : for all group $G$ and all map $f : S \to  G$, there exists a group homomorphism $\overline{f} : F \to  G$ such that $f  = \overline{f} \circ \iota$.
+
+
+\end{definition}
+% https://q.uiver.app/#q=WzAsMyxbMCwwLCJTIl0sWzEsMCwiRyJdLFswLDEsIkYiXSxbMCwxLCJmIl0sWzAsMiwiXFxpb3RhIiwyXSxbMiwxLCJcXGV4aXN0cyAhIFxcb3ZlcmxpbmV7Zn0iLDIseyJzdHlsZSI6eyJib2R5Ijp7Im5hbWUiOiJkb3R0ZWQifX19XV0=
+\[\begin{tikzcd}[cramped]
+	S & G \\
+	F
+	\arrow["f", from=1-1, to=1-2]
+	\arrow["\iota"', from=1-1, to=2-1]
+	\arrow["{\exists ! \overline{f}}"', dotted, from=2-1, to=1-2]
+\end{tikzcd}\]
+
+\subsection{Simple Group}
