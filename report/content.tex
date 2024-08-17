@@ -6,32 +6,275 @@
 - A few elements of type theory \\
 - A bit of syntax (maybe explanation of the lattice structure of 'Subgroup G'\\ }
 
-This section is an introduction the Lean theorem prover, its aim is to give to the readers unfamiliar with \Lean the minimal amount of knowledge necessary to understand this report. More are available at \ref{sec:ComplementLean} and even more can be found in \todo{add real referneces}.
+This section is an introduction the Lean theorem prover, its aim is to give to the readers unfamiliar with \Lean the minimal amount of knowledge necessary to understand this report. More are available at \ref{sec:ComplementLean} and even more can be found. One can find and interact with the code used in this section by clicking \editor. 
 
-\subsection{General introduction to \Lean}%
+  \Lean is a functional language as well as a proof assistant initially developed by Leonardo de Moura in 2013. 
+  It is based on the \emph{calculus of construction} a type theory first created by Thierry Coquand  and that notably used in the Coq theorem prover.
+  
+
+\subsection{General introduction to Lean}%
 \label{sub:Introduction to type theory}
-- generic type
-- function
-- defs
-- proofs
-    - symbols
-    - thm
-- instances
 
-   
-    As such every \Lean  expression has an associated type, and we will denote as \lean{expr : t} the fact that the expression \lean{expr} has type \lean{t}. For instance :
-\begin{itemize} 
-    \item \lean{4 : ℕ}
-    \item \lean{true : Bool} 
-    \item \lean{∃ n : ℕ, 3 ≤ n : Prop}.
-\end{itemize}
-\todo{change linescape}
-A function from a type \lean{α} to a type \lean{β} is an element of type \lean{α → β}
+\subsubsection{Typing}
+  Every \Lean expression, that is every variable, number, string, etc., is associated with a property called a type. This type will has many usage, for example infer which operations can and should be used on the expression. For instance, most programming languages have \lean{Int} (or \lean{int}) and \lean{String} (or \lean{string} or \lean{str}) types to represent integers and strings of characters. While the addition of two integers is perfectly defined as an operation, adding an integer with a string is a bit more mystical. Thus, the compiler or executer of the programming language can become pretty unpleased when asked to add terms of type \lean{Int} and \lean{String}.
+
+  We will denote as \lean{expr : t} the fact that the expression \lean{expr} has type \lean{t}. For instance, \lean{4 : ℕ}, \lean{true : Bool} and \lean{∃ n : ℕ, 3 ≤ n : Prop}. Here, the type \lean{ℕ} represent natural numbers, \lean{Bool} booleans and \lean{Prop} mathematical properties. The last type will be discussed in more details in \ref{sub:somtypes}. One can access, to the type of a term using the \lean{#check} command, see \editor.
+
+  %Types themselves are considered as objects and therefore also have types in \Lean, for instance \lean{Bool : Type} and \lean{Type : Type 2}.
+
+To define an object and even types in \Lean, one can to use the \lean{def} keyword :
+\begin{leancode}
+def one : ℕ := 1
+def vrai : Bool := true
+
+#check one --ℕ
+
+def  α : Type := ℕ
+def one' : α := one
+
+#check one' --α
+\end{leancode}
 
 
+On some occasion the \lean{abbrev} keyword will be used instead of \lean{def} to define objects, the reader unfamiliar with \Lean can simply consider it as equivalent to \lean{def}.
+
+It is also possible to evaluate expression in \Lean by using the \lean{#eval} command :
+\begin{leancode}
+#eval 2 + 3 --5
+#eval one --1
+#eval one' --1
+#eval vrai && true --false
+\end{leancode}
+
+\subsubsection{Function type}
+We will now discuss some ways to create new types in \Lean, starting with the types of functions. 
+
+If \lean{α} and \lean{β} are two types then the type of function from \lean{α} to \lean{β} is denoted \lean{α → β}. For instance :
+\begin{leancode}
+#check Bool.not -- Bool → Bool 
+#check Nat.add -- ℕ → ℕ → ℕ
+\end{leancode}
+
+One way to create functions in \Lean is to use the \lean{fun} keyword. If from a variable \lean{x : α} it is possible to construct a term \lean{t : β} then the expression \lean{fun (x : α) => t : α → β} represent the function mapping \lean{x} to\lean{t}. Here are some examples :
+\begin{leancode}
+#check fun n : ℕ => n + 2 -- ℕ → ℕ
+#check fun (b : Bool) => ¬ b -- Bool → Bool
+
+#check fun (x : ℕ) (b : Bool) => if not b then x else x + 1   -- ℕ → Bool → ℕ
+#check fun x b => if not b then x else x + 1   -- ℕ → Bool → ℕ
+\end{leancode}
+
+
+The last two expressions are interpreted as the same expression by \Lean. That is an example of a very powerful feature of \Lean : type inference. \Lean is indeed able to to infer the type of the variables \lean{x} and \lean{b} because it has enough information to do so. In the exemple above, \Lean knows that an argument of the function \lean{not : Bool → Bool} has type \lean{Bool} so \lean{b : Bool}, the same goes for \lean{n : ℕ}. It is however often good practice to precise the type of variable when introducing them. 
+
+To evaluate the output of a function one simply needs to write its arguments separated by whitespaces, without parenthesis :
+\begin{leancode}
+#eval Nat.add 2 3 --5
+#eval (fun n => n + 2) 3 -- 5
+\end{leancode}
+
+An import detail about function types is that the arrow \lean{\to} is right associative : for every three types \lean{α β γ : Type*} the types \lean{α → β → γ} and \lean{α → (β → γ)} are the same (but not \lean{(α → β) → γ}.
+
+A second way to create functions is to use the \lean{def} keyword by putting the arguments of the function between parenthesis before the colon.
+
+\begin{leancode}
+def add_two (n : ℕ) : ℕ := n + 2
+def add (n m : ℕ) : ℕ := n + m
+
+#eval add_two 3 -- 5
+#eval add 4 3-- 7
+\end{leancode}
+
+To create an abstract undetermined type \lean{α}, one can define then as being of type \lean{Type*} which will "create" a new type for each iteration of \lean{Type*}. Any type can then replace them afterwards.
+This notation can of course be used to take types as arguments and create polymorphic functions, as we can see below for the \lean{identity} function :
+\begin{leancode}
+def identity (α : Type*) (a : α) : α := a
+#check identity ℕ -- ℕ → ℕ
+
+#eval identity ℕ 2 --2
+#eval identity Bool true --true 
+\end{leancode}
+
+However, in the example above having to precise the type \lean{α} in the \lean{identity} function can become tedious and \Lean allows us to avoid that by using \emph{implict arguments}. If the arguments of a function are written between curly braces instead of parenthesis, \Lean will try to infer it from the context.
+ This can be especially useful for function which takes types as arguments and can greatly improve readability, see below :
+\begin{leancode}
+def identity' {α : Type*}  (a : α) := a
+#check identity' 2 -- ℕ 
+#eval identity' 2 --2
+
+#check identity' true-- Bool
+#eval identity' true-- true
+\end{leancode}
+
+Finally, readability of \Lean code can also be improved by using variables. The \lean{variable} keyword allows to declare variables for a whole section of a file \footnote{See \href{https://leanprover.github.io/theorem_proving_in_lean4/interacting_with_lean.html#more-on-sections}{chapter 6} of \cite{TIL} for definition of sections of a \Lean file}, and every definition can have access to them without having to declare them.
+\begin{leancode}
+variable (n : ℕ)
+def add_two' := n + 2
+def add' (m : ℕ) := n + m
+
+#eval add_two 3 -- 5
+#eval add 4 3-- 7
+\end{leancode}
+
+Implicit arguments can also by declared thanks to the \lean{variable} keyword. For instance, the \lean{indentity''} function declared below is  equivalent to the above \lean{identity'}.
+
+\begin{leancode}
+variable {α : Type*} (a : α)
+
+def identity'' := a
+#eval identity'' 2 --2
+#eval identity'' true-- structures
+\end{leancode}
+
+\subsubsection{Structure}
+
+A second way to create new types in \Lean is to use structures. A structure is defined as "a specification of a collection of data, possibly with constraints that the data is required to satisfy" in \cite{MIL}. For instance, we can define a \lean{Point} structure, made of two coordinates as follows :
+\begin{leancode}
+structure Point where
+  x : ℕ
+  y : ℕ
+\end{leancode}
+
+Then, an instance of the structure can be created by providing values for the different fields of the structure. For example, to create an instance \lean{point1} of \lean{Point} we proceed as follow :
+\begin{leancode}
+def point1 : Point where
+  x := 5
+  y := 3
+\end{leancode}
+
+Structure can also take arguments, for instance the type \lean{Prod} of products of two elements is defined as :
+\begin{leancode}
+structure Prod' (α β: Type*) where
+  fst : a
+  snd : β
+
+def point1' : Prod' ℕ ℕ where
+  fst := 5
+  snd := 3
+\end{leancode}
+
+Finally, it is possible to access to values of the different fields of instances of structures \textit{via} \lean{<instance>.<field>}, for instance :
+\begin{leancode}
+#eval point1.x --5
+#eval point1'.fst --5 
+\end{leancode}
+
+\subsubsection{Type classes}
+Another very powerful feature of \Lean are the type classes. This concept allows to associate %endow types with additional "features" \todo{write that well}
+%This feature allows to greatly simplify readability, by associating a 
+"canonical" structures to a type, without having to carry them.
+
+For instance, we can declare a \lean{Group G} instance over a type \lean{G : Type*} as below :
+
+\begin{leancode}
+variable {G : Type*} [Group G]
+\end{leancode}
+
+This automatically endows the type \lean{G} with a multiplication function \lean{* : G → G → G}, an inverse function \lean{⁻¹ : G → G} and a special element \lean{1 : G} \footnote{The \lean{Group G} instance provides other features, but those will not be used here.} which verifies the axioms of a group :
+
+\begin{leancode}
+#check g*g' -- G
+#check g⁻¹ -- G
+#check (1 : G) --G
+
+example : g * g⁻¹ = 1 := mul_inv_cancel g
+example : (g * g') * g'' = g * (g' * g'' ):= mul_assoc g g' g''
+\end{leancode}
+
+When \Lean sees a multiplication between elements of type \lean{G} it will try to find a type class instance over \lean{G} that provides a multiplication (here \lean{Group G}) and use the one supplied by that instance. Thus, the user does not have to provide the definition of the multiplication each time they use it.
+
+Concept other than algebraic structures can be formalized through typeclass instances such as topologies, non emptiness or order as we will see next section.
+
+Some types available in Mathlib comes with their own instances, for example, the type \lean{ℕ} comes with \lean{Semiring ℕ} instance\footnote{A semi ring is a triplet $\left( N, +, \times  \right)$ such that $\left( N,+ \right)$ is a commutative monoid, $\left( N, \times  \right)$ is monoid and $\times $ distributes over $+$.}.
+
+
+\subsection{Some types}%
+\label{sub:somtypes}
+We here present two types that will be used throughout this report : the \lean{Prop} type used to formalize mathematical propositions and the \lean{Subgroup} type, used to formalize the notion of subgroup.
+
+\subsubsection{The \lean{Prop} type}
+
+In this section we will briefly describe the \lean{Prop} type of \Lean.
+
+This type is used to formalize mathematical propositions and its syntax should be intuitively understood by any person with reasonable knowledge of mathematics : the author makes here the hypothesis that the interpretation of terms such as \lean{∀ n : ℕ, n = 0 ∨ ∃ k : ℕ, n = k + 1 : Prop} or \lean{∀ n : ℕ, n > 1 → n ≠ 1 : Prop} should appear clearly to the reader.
     
-\subsection{Formalization of the notion of subgroup}%
-\label{sub:Formalization of the notion of subgroup}
+There are however a few subtleties the author wants to highlight. The first one can already be seen in the last example : the symbol used in \Lean to denote implication is not a double arrow \lean{⇒} but a simple arrow \lean{→}. It actually the same symbol that is used denotes type of functions. That is for a very good reason, both operation are indeed exactly the same in \Lean for reasons which will not explain here but that the interested reader can find in \cite{TIL}. Therefore, implies symbols also associate on the right. 
+
+The second point the author wants to address concerns difference in usage between formalized mathematics and mathematics in natural languages. When a mathematician states that a property $P$ holds as long as two premisses $h_1$ and $h_2$ holds, they will express it in natural language as "if $h_1$ \textbf{and} $h_2$ are true then $P$ is true". It would then be natural to translate the last phrase as $(h_1 \land h_2) \Rightarrow P$ in mathematical language. However, when working with formalized mathematics it is more natural and usual to formulate it as $h_1 \Rightarrow h_2 \Rightarrow P$. Therefore, when seeing propositions of the form \lean{h₁→h₂→...→hₙ→P} one should interpret them as \lean{h₁} and \lean{h₂}, and ... and \lean{hₙ} gives \lean{P}.
+
+The main objective of \Lean as a theorem prover is namely to \emph{prove} these propositions. However, no formalized proof will figure in this report (even though most of the work performed during the internship consisted in formalizing proofs). Indeed, in practice, formalizing proofs makes use of a large diversity of tools, which would need to be explained to the reader. That exercise would require a large amount of efforts for little to no interest for the reader. Moreover, a complex \Lean proof would hardly be readable on paper without an interactive editor. That is why, when referring to a result proven in \Lean we will only state its name and the property it formalizes preceded by the keyword \lean{lemma} or \lean{theorem}. These two keyword are the ones used when formalizing proof. You can find examples below :
+
+\begin{leancode}
+/-This is how the results appear in the code-/
+theorem eq_zero_or_succ: ∀ n : ℕ, n = 0 ∨ ∃ k : ℕ, n = k + 1 := 
+  fun n => Or.elim Nat.eq_zero_or_eq_sub_one_add_one  
+    (fun h => Or.inl h) fun h => Or.inr ⟨n-1, h⟩
+lemma ne_one_of_le_one : ∀ n : ℕ, n > 1 → n ≠ 1:= fun _ h => ne_of_gt h
+
+/-This is how the results are written in the report-/
+theorem eq_zero_or_succ: ∀ n : ℕ, n = 0 ∨ ∃ k : ℕ, n = k + 1
+lemma ne_one_of_le_one : ∀ n : ℕ, n > 1 → n ≠ 1
+\end{leancode}
+
+Moreover, if a structure has fields of type \lean{Prop} then when defining instances of such structures, the fields of type \lean{Prop} will be replaced by ellipsis as below :
+\begin{leancode}
+structure EvenNumber where 
+  n : ℕ
+  even_n : ∃ k, n = 2 * k
+
+/-How it appears in the code-/
+def two_even : EvenNumber where
+ n := 2
+ even_n := ⟨1,mul_one 2⟩
+
+/-How it is written in the report-/
+def two_even : EvenNumber where
+  n := 2
+  ...
+\end{leancode}
+
+We finish this subsection by some more syntax. The four \lean{lemma} below are all equivalent to the \lean{lemma}, \lean{ne_one_of_le_one} above and should be interpreted as follows provided with a natural number \lean{n : ℕ} and proof \lean{h} of \lean{n>1} (denoted \lean{h : n > 1}), \lean{ne_one_of_le_one n h} outputs a proof of \lean{n \neq 1}.
+\begin{leancode}
+lemma ne_one_of_le_one' (n : ℕ) : n > 1 → n ≠ 1
+lemma ne_one_of_le_one'' (n : ℕ) (h : n > 1) : n ≠ 1
+variable (n : ℕ)
+lemma ne_one_of_le_one''' :  n > 1 → n ≠ 1
+lemma ne_one_of_le_one''''  (h : n > 1) : n ≠ 1
+\end{leancode}
+
+Finally, properties pasted as arguments can be used to infer types :
+\begin{leancode}
+lemma ne_one_of_le_one''''' {n : ℕ} (h : n > 1) : n ≠ 1
+variable (h : n > 1)
+#check ne_one_of_le_one n h --n ≠ 1
+#check ne_one_of_le_one''''' h --n ≠ 1
+\end{leancode}
+
+\subsubsection{The \lean{Subgroup} type}
+
+In this section we will present the type \lean{Subgroup} defined in \href{https://github.com/leanprover-community/mathlib4/blob/318082b0bccc3abd9d654496f7b60267f277d5fd/Mathlib/Algebra/Group/Subgroup/Basic.lean}{Mathlib.Algebra.Group.Subgroup.Basic}.
+The language presented here, in particular the structure of \lean{CompleteLattice} of \lean{Subgroup} will be used throughout the report and the reader should pay great attention to the following lines and read them again if necessary.
+
+The \lean{Subgroup} type can be seen\footnote{This is not actually how the \lean{Subgroup} structure is coded in Mathlib. It instead inherits from the \lean{Submonoid} structure but explaining inheritance here would only add an unnecessary layer of complexity.} as a structure taking a type \lean{G : Type*} with \lean{[Group G]} instance as argument and with four fields : a set of element of \lean{G} named \lean{carrier : Set G}, and proofs that this set is closed under product, contain the element \lean{1 : G} and is closed under the inverse operation of \lean{G} :
+
+\begin{leancode}
+structure Subgroup' (G : Type*) [Group G] where
+    carrier : Set G
+    mul_mem' : ∀ {a b : G}, a ∈ carrier → b ∈ carrier → a * b ∈ carrier
+    one_mem' : 1 ∈ carrier
+    inv_mem' : ∀ {x : G}, x ∈ carrier → x⁻¹ ∈ carrier
+\end{leancode}
+
+Let us consider a type \lean{G : Type*} with a \lean{[Group G]} instance.
+The type \lean{Subgroup G} is naturally endowed with a \lean{[CompleteLattice (Subgroup G)]} instance. This instance endows \lean{Subgroup G} with a order \lean{≤ : Subgroup G → Subgroup G → Prop}, a supremum \lean{⊔ :Subgroup G → Subgroup G → Subgroup G} and a infimum \lean{⊓ : Subgroup G → Subgroup G → Subgroup G} functions, a set supremum \lean{⨆ : Set (Subgroup G) → Subgroup G} and a set infimum \lean{⨆ : Set (Subgroup G) → Subgroup G} functions, as well a unique maximal \lean{⊤ : Subgroup G} and a unique minimal \lean{⊥ : Subgroup G} element.
+
+These different all have a very simple mathematical interpretation. The order is the one defined by $H \le K$ if and only if $H$ is a subgroup of $K$ for any two subgroups $H$ and $K$ of \lean{G}.
+
+Therefore, the infimum of two subgroups is nothing more than the intersection of these two subgroups and infimum of a set of subgroup is the intersection of all the subgroups of the set. The supremum of two subgroups is the subgroup generated by the union of these two subgroups and the supremum of a set of subgroup is the group generated by the union of all the groups in the set. Finally, \lean{⊤} and \lean{⊥} the maximal and minimal elements of \lean{Subgroup G} represents the whole group \lean{G} seen as subgroup of itself and the trivial subgroup, respectively.
+
+\begin{remarque}
+    When working with relations between subgroups \lean{⊤} will be used to denote the whole group \lean{G}. For instance, if \lean{H} has type \lean{Subgroup G} then \lean{H = G : Prop} states that \lean{H} and \lean{G} are equal as \emph{types} which is false, whereas \lean{H = ⊤ : Prop} states that \lean{H} and \lean{G} are equal as subgroups of \lean{G} which can be true.
+\end{remarque}
 
 \section{Groups of Lie type}
 {\color{green} There all the material about fsg + Groups of Lie Type (probably all math and (almost) no lean: \\
@@ -40,11 +283,11 @@ A function from a type \lean{α} to a type \lean{β} is an element of type \lean
 - The notion of a $BN-$pair + lean //}
 
 
-As said in the introduction, the main obstacle one may encounter working  with groups of Lie type is the lack of formal consensual definition. The best way to describe these groups would be to say that they are groups which "look like Lie groups" but are not necessarily \todo{see if at all} . For instance, the general and special linear groups, as well as the orthogonal and symplectic groups over finite fields are all groups of Lie type \todo{are they Lie ?}.  
+As said in the introduction, the main obstacle one may encounter working  with groups of Lie type is the lack of formal consensual definition. The best way to describe these groups would be to say that they are groups which "look like Lie groups" but are not necessarily. For instance, the general and special linear groups, as well as the orthogonal and symplectic groups over finite fields are all groups of Lie type \todo{are they Lie ?}.  
 
 
 If this lack of definition does not happen to be a real issue when doing normal pen-and-paper mathematics \todo{Carter}, it becomes more of a problem when it comes to formalization. Fortunately, the theory of groups of Lie type provides us with a powerful tool $BN$-\emph{pairs}. A $BN$-pair over a group $G$ is pair of subgroups of $G$ verifying certain conditions and can be used to state very important results about the structure of the group $G$. Moreover, \emph{every finite group of Lie type} is endowed with such structure and as our work mainly aims at formalizing the \CFSG, this notion makes for an almost perfect foundation for the formalization of groups of Lie type. 
-    However, working $BN$-pairs in \Lean is not exactly the best solution as it relies heavily on the theory of quotient groups, which is formalized in the Mathlib library of \Lean but is not the most pleasant to work with. \todo{say why ?} That is why we introduced an equivalent by more formalization-friendly notion called a $BN\pi$-triplet which is based on surjection instead of quotient, which is the one we will use throughout this report.
+    However, working $BN$-pairs in \Lean is not exactly the best solution as it relies heavily on the theory of quotient groups, which is formalized in the Mathlib library of \Lean but is not pleasant to work with. That is why we introduced an equivalent by more formalization-friendly notion called a $BN\pi$-triplet which is based on surjection instead of quotient, which is the one we will use throughout this report.
 
 The goal of this section is to define $BN$-pairs and present some results about the notion of \emph{double cosets}, a basic concept of groups theory bearing strong links with groups of Lie type. This section starts by defining double cosets, $BN$-pairs and $BN\pi$-triplets and present their formalization in . Then, in \ref{sub:Double Cosets} some results about double cosets and especially doubles cosets of groups with $BN\pi$-tripleti. Finally, these results are put to good use in \ref{sub:GL} to build a $BN\pi$-triplet over the general linear group over a field.
 
@@ -757,11 +1000,9 @@ structure CoxeterSystem {A : Type*} (M : CoxeterMatrix A) (W : Type*)
   mulEquiv : W ≃* M.Group
 \end{leancode}
 
-\todo{Maybe length}
-These definitions is all the Coxeter theory we need.
 
 \subsubsection{BN-pairs and Coxeter theory}
-\label{subsub:Coxeter2}
+\label{subsub:Coxeter2} \todo{Petit paragraphe} 
 \begin{theoreme} \label{thm:Coxeter}
     $\left( W,S \right)$ is a Coxeter system.
 \end{theoreme}
@@ -771,7 +1012,7 @@ These definitions is all the Coxeter theory we need.
 
  Additionally, proving the result mathematically in this report would not be of great interest, as it would either necessitate a large amount on the Coxeter group theory to be exposed -which was not the object of this internship- or that the proofs given would be filled with references to other works. That is why what follows will mostly consists in definitions and statements of theorems with the notable exception of theorem \ref{thm:simple}.
 
-The first property that necessitate advanced Coxeter group theory to be proven is the very fact that $\left( W,S \right)$ is a Coxeter system. We formalized it as follows with the use of \lean{sorry} \footnote{The reader unfamiliar with the implemenation of Coxeter groups in \Lean should not pay to much attention to the following lines and only keep in mind that used \lean{sorry} to provide a Coxeter group structure over \lean{W}.}. \todo{explain sorry} 
+The first property that necessitate advanced Coxeter group theory to be proven is the very fact that $\left( W,S \right)$ is a Coxeter system. We formalized it as follows with the use of \lean{sorry} \footnote{The reader unfamiliar with the implemenation of Coxeter groups in \Lean should not pay to much attention to the following lines and only keep in mind that used \lean{sorry} to provide a Coxeter group structure over \lean{W}.}. The term \lean{sorry} produce an unknown term of the expected type. It is often used as a placeholder for results waiting to be formalized.
 
 \begin{leancode}
 def BNpiTriplet.coxeterMatrix  (TS : BNpiTriplet G W) : CoxeterMatrix TS.S where
@@ -853,7 +1094,7 @@ The normalizer of an object \lean{H : Subtype G} is denoted \lean{H.normalizer :
 This theorem as been formalized as \lean{eq_normalizer_of_parabolic {P : Subgroup G} (h : P.Parabolic TS) : P = P.normalizer}. This theorem as well the following lemma will be used to prove \ref{thm:simple}. This last moreover, more of a technical lemma to prove \ref{thm:simple} than an actual result.
 
 \begin{lemme} \ref{lem:2}
-Let $H \triangleleft G$. There exists $X \subset S$ such that $BH = G_$ and every element of $X$ commute with every element of $S \setminus X$. 
+Let $H \triangleleft G$. There exists $X \subset S$ such that $BH = G_X$ and every element of $X$ commute with every element of $S \setminus X$.
 \end{lemme}
 
 \section{The simplicity theorem}%
@@ -865,7 +1106,7 @@ In this section we state and prove a theorem that can be used to show that group
 Before stating the theorem, we will recall two definitions from group theory.
 
 \begin{definition}
-    A group is \emp{simple} if it has exactly two normal subgroups : the trivial subgroup and itself.
+    A group is \emph{simple} if it has exactly two normal subgroups : the trivial subgroup and itself.
 \end{definition}
 
 In \Lean a group \lean{Γ} is simple if it is endowed with an \lean{IsSimpleGroup Γ} instance.

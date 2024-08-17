@@ -1,4 +1,4 @@
-\documentclass[a4paper,twoside,11pt]{article}
+\documentclass[a4paper,twoside,11t]{article}
 
 \include{preamble.tex}
 \addbibresource{biblio.bib}
@@ -13,6 +13,8 @@
 \newcommand\Lean{L$\exists\forall$N }
 \newcommand\CFSG{CFSG }
 \begin{document}
+
+    \include{link.tex}%for the link to online lean editor
     \listoftodos 
     %only for the first page
     %\include{firstpage.tex}
@@ -22,11 +24,9 @@
     
     %The main content
     \include{content.tex}
-
     %The conclusions
-
-    %\include{conclusion.tex}
     
+    %\include{conclusion.tex}
     \appendix
 
     %\include{annex.tex}
