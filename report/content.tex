@@ -192,7 +192,7 @@ We here present two types that will be used throughout this report : the \lean{P
 
 In this section we will briefly describe the \lean{Prop} type of \Lean.
 
-This type is used to formalize mathematical propositions and its syntax should be intuitively understood by any person with reasonable knowledge of mathematics : the author makes here the hypothesis that the interpretation of terms such as \lean{∀ n : ℕ, n = 0 ∨ ∃ k : ℕ, n = k + 1 : Prop} or \lean{∀ n : ℕ, n > 1 → n ≠ 1 : Prop} should appear clearly to the reader.
+This type is used to formalize mathematical propositions and its syntax should be intuitively understood by any person with reasonable knowledge of mathematics : the author makes here the hypothesis that the interpretation of terms such as \lean{∀ n : ℕ, n = 0 ∨ ∃ k : ℕ, n = k + 1} \lean{ : Prop} or \lean{∀ n : ℕ, n > 1 → n ≠ 1 : Prop} should appear clearly to the reader.
     
 There are however a few subtleties the author wants to highlight. The first one can already be seen in the last example : the symbol used in \Lean to denote implication is not a double arrow \lean{⇒} but a simple arrow \lean{→}. It actually the same symbol that is used denotes type of functions. That is for a very good reason, both operation are indeed exactly the same in \Lean for reasons which will not explain here but that the interested reader can find in \cite{noauthor_theorem_nodate}. Therefore, implies symbols also associate on the right. 
 
@@ -262,7 +262,7 @@ structure Subgroup' (G : Type*) [Group G] where
 \end{leancode}
 
 Let us consider a type \lean{G : Type*} with a \lean{[Group G]} instance.
-The type \lean{Subgroup G} is naturally endowed with a \lean{[CompleteLattice (Subgroup G)]} instance. This instance endows \lean{Subgroup G} with a order \lean{≤ : Subgroup G → Subgroup G → Prop}, a supremum \lean{⊔ :Subgroup G → Subgroup G → Subgroup G} and a infimum \lean{⊓ : Subgroup G → Subgroup G → Subgroup G} functions, a set supremum \lean{⨆ : Set (Subgroup G) → Subgroup G} and a set infimum \lean{⨆ : Set (Subgroup G) → Subgroup G} functions, as well a unique maximal \lean{⊤ : Subgroup G} and a unique minimal \lean{⊥ : Subgroup G} element.
+The type \lean{Subgroup G} is naturally endowed with a \lean{[CompleteLattice (Subgroup G)]} instance. This instance endows \lean{Subgroup G} with a order \lean{≤ : Subgroup G → Subgroup G → Prop}, a supremum function \lean{⊔ :Subgroup G → Subgroup G → Subgroup G} and a infimum function \lean{⊓ : Subgroup G} \lean{→ Subgroup G → Subgroup G}, a set supremum \lean{⨆ : Set (Subgroup G) → Subgroup G} and a set infimum \lean{⨆ : Set (Subgroup G) → Subgroup G} functions, as well a unique maximal \lean{⊤ : Subgroup G} and a unique minimal \lean{⊥ : Subgroup G} element.
 
 These different all have a very simple mathematical interpretation. The order is the one defined by $H \le K$ if and only if $H$ is a subgroup of $K$ for any two subgroups $H$ and $K$ of \lean{G}.
 
@@ -696,7 +696,8 @@ def toPermHom : (MonomialGroup : Subgroup (GL n F)) →* Perm n where
   ...
 \end{leancode}
 
-\begin{commentary}
+\begin{commentary} \
+
     In the above code we first define the function $f$ as \lean{Matrix.toPermFun} for matrices which are monomial. Then \lean{Matrix.toPerm} lift it to an element of \lean{Perm n}, the type of permutation on \lean{n}. Finally, \lean{toPermHom} lift \lean{Matrix.toPerm} a group homomorphism from \lean{MonomialGroup : Subgroup (GL n F)} to \lean{Perm n}.
 \end{commentary}
 
@@ -722,7 +723,7 @@ Immediately we have the following property :
     It is immediately clear that the permutation matrices are monomial and that the map $P$ is injective. Then, the multiplicativity of $P$ can be verified through simple computations.
 \end{proof}
 
-In \Lean we first define the map $P$ as the function \lean{PermMatrix : Perm n → Matrix n n F}, then we endow it with a monoid homomorphism \lean{_PermMatrix_Hom : Perm n →* Matrix n n F}. This monoid homomorphism is then lifted to a group homomorphism from \lean{Perm n} to the group of units of \lean{Matrix n n F}, that is \lean{GL n F := (Matrix n n F)ˣ} called \lean{PermMatrix_Hom} \lean{ : Perm n →* GL n F}. Finally, \lean{PermMatrixGroup : Subgroup (GL n F)} the group of permutation matrices is defined as the range of that last homomorphism and by restricting this same morphism to its range we obtain the group homomorphism \lean{PermMatrix_Hom' : Perm n →*} \lean{PermMatrixGroup}.
+In \Lean we first define the map $P$ as the function \lean{PermMatrix : Perm n → Matrix n n F}, then we endow it with a monoid homomorphism \lean{_PermMatrix_Hom : Perm n →* Matrix n n F}. This monoid homomorphism is then lifted to a group homomorphism from \lean{Perm n} to the group of units of \lean{Matrix n n F}, that is \lean{GL n F := (Matrix n n F)ˣ} called \lean{PermMatrix_Hom} \lean{: Perm n →* GL n F}. Finally, \lean{PermMatrixGroup : Subgroup (GL n F)} the group of permutation matrices is defined as the range of that last homomorphism and by restricting this same morphism to its range we obtain the group homomorphism \lean{PermMatrix_Hom' : Perm n →*} \lean{PermMatrixGroup}.
 \begin{leancode}
 /--The permutation matrix associated to a permutation `f`.-/
 def PermMatrix (f : Perm n) : Matrix n n F := 
@@ -859,8 +860,9 @@ theorem GLsubset_union_doubleCosets : ∀ (M Ma : MonomialGroup), ∀ s ∈ Swap
 \end{leancode}
 \end{enumerate}
 
-\begin{implementation}
-The different results presented above allow us to build an object of type \lean{BNpiTriplet (GL n F) (Perm n)} as follows :      
+\begin{implementation}\
+
+Formalizing the above proof of \ref{thm:GL} allows us to build an object \lean{GeneralLinearGroup_BNpiTriplet} of type \lean{BNpiTriplet (GL n F) (Perm n)} as follows :      
 \begin{leancode}
 /--The `BNMphiQuadruplet`  structure over `GL n F`.-/
 noncomputable
@@ -874,7 +876,8 @@ def GeneralLinearGroup_BNpiTriplet : BNpiTriplet (GL n F) (Perm n) where
   ker_pi_eq_B_subgroupOf_N := ker_toPermHom_eq_Diagonal
   self_inverse_of_mem_S := self_inverse_of_mem_SwapSet
   top_eq_S_closure := top_eq_swap_closure
-  left_right_mul_B_neq_B_of_map_S := fun _ h => left_right_mul_Triangular_neq_Triangular_of_map_swap h
+  left_right_mul_B_neq_B_of_map_S := 
+    fun _ h => left_right_mul_Triangular_neq_Triangular_of_map_swap h
   subset_union_doubleCosets := GLsubset_union_doubleCosets'
 \end{leancode}
 \end{implementation}
@@ -924,18 +927,19 @@ def QuotientBNpiTriplet (Z : Subgroup G) [Normal Z] (ZleB : Z ≤ TS.B): BNpiTri
         \item
     The definition of \lean{ImageBNpiTriplet} may seem verbose and ask for more argument than necessary. It is true but it makes the formalization easier. 
 
-\item The term \lean{QuotientGroup.mk'_surjective Z : Function.Surjective} \lean{⇑(QuotientGroup.mk' Z)} used in the definition of \lean{QuotientBNpiTriplet} is a proof that the natural homomorphism from $G$ to $G / Z$, \lean{QuotientGroup.mk' Z: G → G ⧸ Z} is surjective.
+\item The term \lean{QuotientGroup.mk'_surjective Z} of type \lean{Function.Surjective} \lean{⇑(QuotientGroup.mk' Z)} used in the definition of \lean{QuotientBNpiTriplet} is a proof that \lean{QuotientGroup.mk' Z: G → G ⧸ Z}, the natural homomorphism from $G$ to $G / Z$ is surjective.
     \end{itemize}
 \end{commentary}
 
 
 \begin{ex}
     In the case of $G = GL_n(F)$, the center $Z$ of $GL_n(F)$ is normal in $GL_n(F)$ and is equal the group of nonzero scalar matrices and as such $Z \le B_n(F)$. Therefore, the quotient $BN\pi$-triplet of $\left( B_n(F),N_n(F), \pi \right)$ by $Z$ forms a $BN\pi$-triplet over $PGL_n\left( F \right) := GL_n(F)/Z$.
-One can find this fact formalized in \lean{GLn.lean}\footnote{The definition of \lean{PGL} is not present in Mathlib and was coded for this project, you can find it defined in \ref{oui l'annexe et tout}} as :
+    One can find this fact formalized in \lean{GLn.lean}\footnote{The definition of \lean{PGL} is not present in Mathlib and was coded for this project, you can find it defined in the \href{https://github.com/corent1234/BNpairs/blob/master/finite_groups_of_Lie_type/FiniteGroupsOfLieType/GLn/GLn.lean}{\lean{GLn.lean}} file} as :
 \begin{leancode}
 noncomputable
 def ProjectiveGeneralLinearGroup_BNpiTriplet : BNpiTriplet (PGL n F) (Perm n) :=
-  QuotientBNpiTriplet (GeneralLinearGroup_BNpiTriplet n F) (Subgroup.center (GL n F))  GLncenter_le_Triangular
+  QuotientBNpiTriplet (GeneralLinearGroup_BNpiTriplet n F) (Subgroup.center (GL n F)) ...
+   
 \end{leancode}  
 \end{ex}
 
@@ -1107,7 +1111,7 @@ Now we introduce the definition of parabolic subgroups as below :
 \begin{leancode}
 def Subgroup.Parabolic (P : Subgroup G) : Prop := ∃g, ConjugatedSubgroup TS.B g ≤ P
 \end{leancode}
-where \lean{ConjugatedSubgroup TS.B g : Subgroup G} is the subgroup of \lean{G} with \lean{carrier := {w} * B.carrier * {w⁻¹}}.
+where \lean{ConjugatedSubgroup TS.B g : Subgroup G} is the subgroup of \lean{G} with \lean{carrier :=} \lean{{w} * B.carrier * {w⁻¹}}.
 
 Before, stating the only result on parabolic groups of this report we will recall the definition of the normalizer of a subgroup.
 
@@ -1260,7 +1264,7 @@ These groups are (surprisingly) denoted \lean{SL n F} and \lean{PSL n F} in \Lea
             Let $X$ be a subset of $S_n$ such that every element of $X$ commutes with every element of $S_n -X$. Set $X' := X \cap S_{n-1}$, it is a subset of $S_{n-1}$ that commutes with every element of its complement in $S_{n-1}$, thus by hypothesis it is either $S_{n-1}$ or $\emptyset$. If $X' = S_{n-1}$ then $\left( n-1,n \right)$ does not commute with $(n-2,n-1) \in X'$ so $\left( n-1n \right)\in X$ and $X = S_n$. Otherwise, if $X' = \emptyset$ then as $\left( n-2,n-1 \right)$ belongs to $S_n -X$ so does $\left( n-1,n \right)$ and hence $X=\emptyset$.
     \end{enumerate}
 
-    Therefore, by corollary \ref{cor:1} the group $G_1 / (Z \cap G_1) = SL_n(F) / \left( Z \cap SL_n\left( F \right) \right)$ is simple or trivial.
+    Therefore, by theorem \ref{thm:simple} the group $G_1 / (Z \cap G_1) = SL_n(F) / \left( Z \cap SL_n\left( F \right) \right)$ is simple or trivial.
     Now let us verify that $Z$ is the center of $SL_n\left( F \right)$, by using corollary \ref{cor:2}. We see by conjugating by permutation matrices that very matrix in $Z$ is diagonal. The only strictly upper triangular matrix that is diagonal is the identity matrix. Hence, $Z \cap U = \{I_n\}$ and $Z$ is the center of $SL_n\left( F \right)$ . Therefore, $PSL_n\left( F \right)$ is simple because it is not trivial : for example the image of $\left( \begin{smallmatrix}
             0 & 1 \\ 1 & 0\\
     \end{smallmatrix}
