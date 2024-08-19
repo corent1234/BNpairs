@@ -1,19 +1,15 @@
 \section{The Lean theorem prover}
 \label{sec:lean-intro}
 
-{\color{green} Here a quick intro to lean so that the reader can understand what is going on : \\
-- Global presentation of Lean (introductory §)\\
-- A few elements of type theory \\
-- A bit of syntax (maybe explanation of the lattice structure of 'Subgroup G'\\ }
+This section is an introduction the Lean theorem prover, its aim is to give to the readers unfamiliar with \Lean the minimal amount of knowledge necessary to understand this report. Resources for learning how to use \Lean are available at \url{https://lean-lang.org/documentation/}.
+. One can find and interact with the code used in this section by clicking \editor. 
 
-This section is an introduction the Lean theorem prover, its aim is to give to the readers unfamiliar with \Lean the minimal amount of knowledge necessary to understand this report. More are available at \ref{sec:ComplementLean} and even more can be found. One can find and interact with the code used in this section by clicking \editor. 
-
-  \Lean is a functional language as well as a proof assistant initially developed by Leonardo de Moura in 2013. 
-  It is based on the \emph{calculus of construction} a type theory first created by Thierry Coquand  and that notably used in the Coq theorem prover.
-  
+In this section we begin present the notion of type which is of capital importance in \Lean. We then describe ways to construct new types which will be used in this internship. Finally, we briefly present the types \lean{Prop} and \lean{Subgroup}.
 
 \subsection{General introduction to Lean}%
 \label{sub:Introduction to type theory}
+
+\Lean is based on the \emph{calculus of construction} a type theory first created by Thierry Coquand and that notably serves as foundation for the \href{https://coq.inria.fr/}{Coq proof assistant}. As such the notion of type is of capital importance in \Lean, and this subsection aims to give the reader basic knowledges about this concept.
 
 \subsubsection{Typing}
   Every \Lean expression, that is every variable, number, string, etc., is associated with a property called a type. This type will has many usage, for example infer which operations can and should be used on the expression. For instance, most programming languages have \lean{Int} (or \lean{int}) and \lean{String} (or \lean{string} or \lean{str}) types to represent integers and strings of characters. While the addition of two integers is perfectly defined as an operation, adding an integer with a string is a bit more mystical. Thus, the compiler or executer of the programming language can become pretty unpleased when asked to add terms of type \lean{Int} and \lean{String}.
@@ -106,7 +102,7 @@ def identity' {α : Type*}  (a : α) := a
 #eval identity' true-- true
 \end{leancode}
 
-Finally, readability of \Lean code can also be improved by using variables. The \lean{variable} keyword allows to declare variables for a whole section of a file \footnote{See \href{https://leanprover.github.io/theorem_proving_in_lean4/interacting_with_lean.html#more-on-sections}{chapter 6} of \cite{TIL} for definition of sections of a \Lean file}, and every definition can have access to them without having to declare them.
+Finally, readability of \Lean code can also be improved by using variables. The \lean{variable} keyword allows to declare variables for a whole section of a file \footnote{See \href{https://leanprover.github.io/theorem_proving_in_lean4/interacting_with_lean.html}{chapter 6} of \cite{noauthor_theorem_nodate} for definition of sections of a \Lean file}, and every definition can have access to them without having to declare them.
 \begin{leancode}
 variable (n : ℕ)
 def add_two' := n + 2
@@ -128,7 +124,7 @@ def identity'' := a
 
 \subsubsection{Structure}
 
-A second way to create new types in \Lean is to use structures. A structure is defined as "a specification of a collection of data, possibly with constraints that the data is required to satisfy" in \cite{MIL}. For instance, we can define a \lean{Point} structure, made of two coordinates as follows :
+A second way to create new types in \Lean is to use structures. A structure is defined as "a specification of a collection of data, possibly with constraints that the data is required to satisfy" in \cite{noauthor_mathematics_nodate}. For instance, we can define a \lean{Point} structure, made of two coordinates as follows :
 \begin{leancode}
 structure Point where
   x : ℕ
@@ -160,7 +156,7 @@ Finally, it is possible to access to values of the different fields of instances
 \end{leancode}
 
 \subsubsection{Type classes}
-Another very powerful feature of \Lean are the type classes. This concept allows to associate %endow types with additional "features" \todo{write that well}
+Another very powerful feature of \Lean are the type classes. This concept allows to associate %endow types with additional "features" 
 %This feature allows to greatly simplify readability, by associating a 
 "canonical" structures to a type, without having to carry them.
 
@@ -198,7 +194,7 @@ In this section we will briefly describe the \lean{Prop} type of \Lean.
 
 This type is used to formalize mathematical propositions and its syntax should be intuitively understood by any person with reasonable knowledge of mathematics : the author makes here the hypothesis that the interpretation of terms such as \lean{∀ n : ℕ, n = 0 ∨ ∃ k : ℕ, n = k + 1 : Prop} or \lean{∀ n : ℕ, n > 1 → n ≠ 1 : Prop} should appear clearly to the reader.
     
-There are however a few subtleties the author wants to highlight. The first one can already be seen in the last example : the symbol used in \Lean to denote implication is not a double arrow \lean{⇒} but a simple arrow \lean{→}. It actually the same symbol that is used denotes type of functions. That is for a very good reason, both operation are indeed exactly the same in \Lean for reasons which will not explain here but that the interested reader can find in \cite{TIL}. Therefore, implies symbols also associate on the right. 
+There are however a few subtleties the author wants to highlight. The first one can already be seen in the last example : the symbol used in \Lean to denote implication is not a double arrow \lean{⇒} but a simple arrow \lean{→}. It actually the same symbol that is used denotes type of functions. That is for a very good reason, both operation are indeed exactly the same in \Lean for reasons which will not explain here but that the interested reader can find in \cite{noauthor_theorem_nodate}. Therefore, implies symbols also associate on the right. 
 
 The second point the author wants to address concerns difference in usage between formalized mathematics and mathematics in natural languages. When a mathematician states that a property $P$ holds as long as two premisses $h_1$ and $h_2$ holds, they will express it in natural language as "if $h_1$ \textbf{and} $h_2$ are true then $P$ is true". It would then be natural to translate the last phrase as $(h_1 \land h_2) \Rightarrow P$ in mathematical language. However, when working with formalized mathematics it is more natural and usual to formulate it as $h_1 \Rightarrow h_2 \Rightarrow P$. Therefore, when seeing propositions of the form \lean{h₁→h₂→...→hₙ→P} one should interpret them as \lean{h₁} and \lean{h₂}, and ... and \lean{hₙ} gives \lean{P}.
 
@@ -251,7 +247,7 @@ variable (h : n > 1)
 \end{leancode}
 
 \subsubsection{The \lean{Subgroup} type}
-
+\label{subsub:subgroup}
 In this section we will present the type \lean{Subgroup} defined in \href{https://github.com/leanprover-community/mathlib4/blob/318082b0bccc3abd9d654496f7b60267f277d5fd/Mathlib/Algebra/Group/Subgroup/Basic.lean}{Mathlib.Algebra.Group.Subgroup.Basic}.
 The language presented here, in particular the structure of \lean{CompleteLattice} of \lean{Subgroup} will be used throughout the report and the reader should pay great attention to the following lines and read them again if necessary.
 
@@ -277,27 +273,23 @@ Therefore, the infimum of two subgroups is nothing more than the intersection of
 \end{remarque}
 
 \section{Groups of Lie type}
-{\color{green} There all the material about fsg + Groups of Lie Type (probably all math and (almost) no lean: \\
-- A few definitions (the classification, a simple group etc.)(I'll probably add the definitions of a simple group in annex, just to be sure)\\
-- Coxeter groups + implementation in lean \\
-- The notion of a $BN-$pair + lean //}
+\label{sec:BN}
+
+%As said in the introduction, the main obstacle one may encounter working  with groups of Lie type is the lack of a consensual definition. The best way to understand the intuition of what these groups is describe them as groups which "look like Lie groups" but are not necessarily. For instance, the general and special linear groups, as well as the orthogonal and symplectic groups over finite fields are all groups of Lie type.
 
 
-As said in the introduction, the main obstacle one may encounter working  with groups of Lie type is the lack of formal consensual definition. The best way to describe these groups would be to say that they are groups which "look like Lie groups" but are not necessarily. For instance, the general and special linear groups, as well as the orthogonal and symplectic groups over finite fields are all groups of Lie type \todo{are they Lie ?}.  
+If the lack of a consensual definition mentioned in the introduction doe not appear to be a real issue when doing pen-and-paper mathematics, it becomes a problem when it comes to formalization. Fortunately, the theory of groups of Lie type provides a powerful tool $BN$-\emph{pairs}. A $BN$-pair over a group $G$ is pair of subgroups of $G$ verifying certain conditions and can be used to state very important results about the structure of the group $G$. Moreover, \emph{every finite group of Lie type} is endowed with such structure and as our work mainly aims at formalizing the \CFSG, this notion makes for an almost perfect foundation for the formalization of groups of Lie type. 
+However, working $BN$-pairs in \Lean is not exactly the best solution as it relies heavily on the theory of quotient groups, which is formalized in the \href{https://github.com/leanprover-community/mathlib4}{\lean{mathlib}} library of \Lean but is not pleasant to work with. That is why we introduced an equivalent by more formalization-friendly notion called a $BN\pi$-triplet which makes use of surjection instead of quotient, and which is the one we will use throughout this report.
 
-
-If this lack of definition does not happen to be a real issue when doing normal pen-and-paper mathematics \todo{Carter}, it becomes more of a problem when it comes to formalization. Fortunately, the theory of groups of Lie type provides us with a powerful tool $BN$-\emph{pairs}. A $BN$-pair over a group $G$ is pair of subgroups of $G$ verifying certain conditions and can be used to state very important results about the structure of the group $G$. Moreover, \emph{every finite group of Lie type} is endowed with such structure and as our work mainly aims at formalizing the \CFSG, this notion makes for an almost perfect foundation for the formalization of groups of Lie type. 
-    However, working $BN$-pairs in \Lean is not exactly the best solution as it relies heavily on the theory of quotient groups, which is formalized in the Mathlib library of \Lean but is not pleasant to work with. That is why we introduced an equivalent by more formalization-friendly notion called a $BN\pi$-triplet which is based on surjection instead of quotient, which is the one we will use throughout this report.
-
-The goal of this section is to define $BN$-pairs and present some results about the notion of \emph{double cosets}, a basic concept of groups theory bearing strong links with groups of Lie type. This section starts by defining double cosets, $BN$-pairs and $BN\pi$-triplets and present their formalization in . Then, in \ref{sub:Double Cosets} some results about double cosets and especially doubles cosets of groups with $BN\pi$-tripleti. Finally, these results are put to good use in \ref{sub:GL} to build a $BN\pi$-triplet over the general linear group over a field.
+The goal of this section is to define $BN$-pairs and present some results about the notion of \emph{double cosets}, a basic concept of groups theory bearing strong links with groups of Lie type. This section starts by defining double cosets, $BN$-pairs and $BN\pi$-triplets and present their formalization in \Lean. Then, in \ref{sub:Double Cosets} some results about double cosets and especially doubles cosets of groups with $BN\pi$-triplet are exposed. Finally, these results are put to good use in \ref{sub:GL} to build a $BN\pi$-triplet over the general linear group over a field.
 
 \subsection{Definition}%
 
 \label{sub:Definition}
 
-For this all, report we we fix two groups $G$ and $W$ and in \Lean we declare two variables \lean{G W: Type*} endowed with a \lean{[Group G]} and \lean{[Group W]} instance, respectively. We additionally fix two subgroups $B$ and $N$ of $G$ and $\pi$ a group homomorphism from $N$ to $W$.
+For this all, report we we fix two groups $G$ and $W$ and in \Lean we declare two variables \lean{G W: Type*} endowed with a \lean{[Group G]} and \lean{[Group W]} instance. We additionally fix two subgroups $B$ and $N$ of $G$ and $\pi$ a group homomorphism from $N$ to $W$.
 
-First and foremost, we need to define the notion of double coset. A concept that although elementary is of capital importance to discuss effectively the structure of groups of Lie type.We only give their definition this subsection and there will be further discussion on this notion and its link with \ref{sub:Double Cosets}.
+First and foremost, we need to define the notion of double coset. A concept that, although elementary, is of capital importance to discuss effectively the structure of groups of Lie type. In this subsection, we only give their definition and they will further discussed in \ref{sub:Double Cosets}.
 
 \begin{definition}[Double coset] \label{def:DC}
     A \emph{double coset} of a subgroup $H$ of $G$ is a set of the form $HgH$ for $g \in G$. We  will denote as $C\left( g \right)$ the double coset $BgB$, for $w \in G$. \end{definition} 
@@ -307,13 +299,13 @@ First and foremost, we need to define the notion of double coset. A concept that
 abbrev DoubleCoset (B : Subgroup G) (w : G) : Set G := 
     {x | ∃ b  b' : B, b * w * b' = x}
     \end{leancode} 
-    However, for the sake of readability the notation below was added to code \footnote{The code presented here allows to write \lean{C} instead \lean{DoubleCoset} in the code.} :
+    However, for the sake of readability the notation below was added to the code \footnote{The code presented here allows to write \lean{C} instead \lean{DoubleCoset} in the code.} :
 \begin{leancode}
 notation "C"  => DoubleCoset 
 \end{leancode}
 
-The definition of double coset allow us to introduce the main object of study of this report : $BN$-pairs.
-\todo{citer carter} 
+The definition of double coset allow us to introduce the main object of study of this report : $BN$-pairs. 
+
 \begin{definition}[$BN$-pair] \label{BN}
     The couple $\left( B,N \right)$ of subgroups of $G$ forms a \emph{$BN$-pair} over $G$ if it that satisfies the following axioms :
     \begin{enumerate}
@@ -322,16 +314,14 @@ The definition of double coset allow us to introduce the main object of study of
         \item The group $N / T$ is generated by a set $S$ of elements of order 2.
         \item For all $n_{i} \in N$ that maps to an element of $S$ under the natural group homomorphism $N \to N / T$, $n_{i}Bni \neq B$.
         \item For all $n_{i}$ as above and all $n \in N, \ $ $n_i B n \subset C(n_in) \cup C(n)$
-    \end{enumerate} where $C(g)$ is the double coset $BgB$ for all $g \in G$.
+    \end{enumerate} where $C(g)$ denotes the double coset $BgB$ for $g \in G$.
 \end{definition}
-
 
 \begin{notation}
     If $\left( B,N \right)$ is a $BN-$pair over $G$, we also say that $\left( G, B, N, S \right)$ is a \emph{Tits system}, see for instance \cite{bourbaki_groupes_2007}.
 \end{notation}
 
-
-However, the definition of a $BN$-pair presented above can be impractical manipulate in \Lean. Indeed, if the quotient groups are fully implemented in the Mathlib library and working with this definition would still be be possible, it is simpler to avoid their use and instead have recourse to surjective group homomorphism. 
+However, the definition of a $BN$-pair presented above can be impractical to manipulate in \Lean. Indeed, if quotient groups are fully implemented in the \Mathlib library and working with this definition would still be be possible, it is simpler to avoid their use and instead have recourse to surjective group homomorphism.
     This is why we introduced the new and equivalent (see \ref{thm:to pi or not to pi}) structure of a $BN\pi-$triplet.  %We will nonetheless need to use quotient groups later in this work \todo{réf}.
 
 \begin{definition}[$BN\pi$-Triplet] \label{BNpi}
@@ -354,14 +344,12 @@ First of all let us show that the two structures are equivalent. This is the poi
 \end{theoreme}
 
 \begin{proof}
-    If $G$ is endowed with a $BN$-pair structure, it immediately has a $BN\pi$-Triplet with $W = N / (B \cap N)$ and $\pi$ the natural projection $N \to W$.
+    If the group $G$ is endowed with a $BN$-pair structure, it immediately has a $BN\pi$-Triplet with $W = N / (B \cap N)$ and $\pi$ the natural projection $N \to W$.
 
     Conversely, if $G$ has a $BN\pi$-Triplet structure, then by lifting $\pi$ through the natural projection to $N / \left( B \cap N \right)$ we obtain a group isomorphism $\tilde{\pi} : W \MapsTo N / \left( B \cap N \right)$. Then if $S \subset W$ denotes the generating set of $W$ from the definition of a $BN\pi$-triplet, $\left(G, B, N, \tilde{\pi}^{-1}\left( S \right)  \right)$ is a Tits system.
 \end{proof}
 
 The concept of $BN\pi$-triplet is formalized as follow in the \lean{Basic.lean} file :
-
-\begin{implementation}[$BN\pi$-Triplet] \
 
 \begin{leancode}
 structure BNpiTriplet (G : Type*) [Group G] (W : Type*) [Group W] where
@@ -389,11 +377,10 @@ structure BNpiTriplet (G : Type*) [Group G] (W : Type*) [Group W] where
   subset_union_doubleCosets :  ∀ (n ni : N), ni ∈ pi ⁻¹' S ->
    {ni * b.val * n | b : B} ⊆ C B (ni * n) ∪ C B n
 \end{leancode}
-\end{implementation}
 
 \begin{remarque}
     \begin{enumerate}
-        \item The term \lean{B.subgroupOf N : Subgroup N} designates the groups \lean{B ⊓ N} seen as a subgroup of \lean{N} instead of \lean{G}.
+        \item The term \lean{B.subgroupOf N : Subgroup ↑N} designates the groups \lean{B ⊓ N} seen as a subgroup of \lean{N} instead of \lean{G}.
         \item The property \lean{S_auto_inverse : ∀ s ∈ S, s * s = 1} ensure that every element of \lean{S : Set W} has order at most \lean{2}, and property  \lean{left_right_mul_B_neq_B_of_map_S} ensures that they do not have order \lean{1}.
     \end{enumerate}
     
@@ -402,7 +389,7 @@ structure BNpiTriplet (G : Type*) [Group G] (W : Type*) [Group W] where
 \subsection{Double Cosets}
 \label{sub:Double Cosets}
 
-In this section we expose some properties on the double cosets and especially double cosets of groups with a $BN$-pair.
+In this section we expose some properties of the double cosets and especially double cosets of groups with a $BN$-pair.
 
 We do not suppose at first that there is a $BN\pi$-triplet over $G$ and state some general facts about double cosets : 
 
@@ -451,7 +438,7 @@ theorem DoubleCoset.mul_apply (g g' :G) :
 
 Moreover the link between double cosets and $BN\pi$-triplet appears more clearly through the following properties: 
 
-\begin{proprietes} \label{prop:DC2}
+\begin{proprietes} \label{prop:DC2} \
     \begin{enumerate}
 \item For all $g,g' \in G$, we have  $g B g' \subset C(g) \cup C(g'g) $ if and only if $C(g). C(g') \subset C(g) \cup  C(g')$
 \item For all $g_i, g$ such that $C(g_i).C(g) \subset C(g) \cup C(g_i g)$
@@ -466,39 +453,45 @@ Moreover the link between double cosets and $BN\pi$-triplet appears more clearly
 \end{proprietes}
 
 \begin{proof}
-The first point is immediate, the second comes from the hypothesis and the points 2 and 4 of \ref{prop:DC1}. For the third point, the identity $B \cup C(g_{i}) = C(g_i). C\left( g_i \right)$  follows from the second point in the case $g = g_i$ and $g_i ^2 = 1$, and using this equality it is easy to show that $B \cup C(g_i)$ is a subgroup of $G$.
+The first point is immediate, the second follows from the hypothesis and the points 2 and 4 of \ref{prop:DC1}. Concerning the third point, the identity $B \cup C(g_{i}) = C(g_i). C\left( g_i \right)$  follows from the second point in the case $g = g_i$ and $g_i ^2 = 1$, and using this equality it is easy to show that $B \cup C(g_i)$ is a subgroup of $G$.
 \end{proof} 
 
-The point 1 of \ref{prop:DC2} can be use to give an alternative statement to point 5 and 6 of \ref{BN} or \ref{BNpi}. The point $6$ can be seen as a very particular case of \todo{yes} and will be used in \ref{sub:GL}. We formalized it as :
+\begin{remarque}
+The point 1 of \ref{prop:DC2} can be use to give an alternative statement to point 5 and 6 of \ref{BN} or \ref{BNpi}. The point $6$ can be seen as a very particular case of \ref{thm:GX} and will be used in \ref{sub:GL}. We formalized it as :
 \begin{leancode}
 def B_union_C_of_simple {s : G} (hs : s*s = 1) (h: {s*b*s | b : B} ⊆ C B s ∪ (C B (s*s)))
     (h' :¬ {s*b*s | b:B} ⊆ B.carrier) : Subgroup G where
   carrier := B.carrier ∪ (C B s)
   ...
 \end{leancode}
+\end{remarque}
 
 We now suppose that $\left( B,N, \pi \right)$ is a $BN\pi$-triplet over $G$. In \Lean we fix a variable \lean{TS} of type \lean{BNpiTriplet G W}. 
 
-\begin{definition}[LE NAAAAAAAME] \label{def:BNDC}
+\begin{definition} \label{def:BNDC}
 The \emph{double coset} $C'(w)$ of an element $w\in W$ is defined as the double coset $C(n)$ of $B$ for $n \in N$ mapping to $w$ through $\pi$.
 \end{definition}
 
-\begin{remark}
+\begin{remark} \
+
     \begin{itemize}
         \item The set $C'\left( w \right)$ is well defined for all $w \in W$ because using the point 4 of \ref{BNpi} we have $\ker \pi = N \cap B \le B$.
-        \item Some authors use the above definition of a double coset to define $BN\pi$-pairs (see for example \cite{bourbaki_groupes_2007}) as the most important results of the theory of groups with $BN$-pair are more conveniently expressed through double cosets of elements $W$ than double cosets of elements of $G$. The theorems \todo{} below are good examples of this. 
+        \item Some authors use the above definition of a double coset to define $BN\pi$-pairs (see for example \cite{bourbaki_groupes_2007}) as the most important results of the theory of groups with $BN$-pair are more conveniently expressed through double cosets of elements $W$ than double cosets of elements of $G$. The theorems \ref{thm:DCD} and \ref{thm:GX} below are good examples of this fact.
 However, it is more comfortable to use the definition \ref{def:BNDC} to formalize the property of a certain group having a $BN\pi$-triplet and to first prove properties of double cosets of elements of $G$ and then transfer them to double cosets of elements of $W$.
 \end{itemize}
 \end{remark}
 
-In order to make the \Lean code more readable, we encoded the definition \lean{def BNpiTriplet.C (n : TS.N) : Set G := C TS.B n} that allows to access to \lean{C TS.B n : Set G} by typing \lean{TS.C n : Set G} for any element \lean{n : TS.N}. Then we formalize the above definition as :
+In order to make the \Lean code more readable, we added \lean{BNpiTriplet.C} defintion that allows to access to \lean{C TS.B n : Set G} by typing \lean{TS.C n : Set G} for any element \lean{n : TS.N}. Then we formalize the above definition as \lean{BNpiTriplet.C'}.
 \begin{leancode}
+def BNpiTriplet.C (n : TS.N) : Set G := C TS.B n
+
 def BNpiTriplet.C' (w : W): Set G := 
   TS.C (@Classical.choose TS.N (fun n => TS.pi n = w) (TS.pi_surj w))
 \end{leancode} 
 
-\begin{commentary} 
-The function \lean{Classical.choose : {α : Type *} {p : α → Prop} (h : ∃ x, p x) : α} maps to an object \lean{h : ∃ x, p x} for a certain \lean{p : α → Prop} a element of type \lean{α} that verifies \lean{p}
+\begin{commentary} ~\\
+\noindent
+The function \lean{Classical.choose :{α : Type*} {p : α → Prop} (h : ∃ x, p x)} \lean{ : α} maps to an object \lean{h : ∃ x, p x} for a certain \lean{p : α → Prop} a element of type \lean{α} that verifies \lean{p}.
 \end{commentary}
 
 For a convenient use of the double cosets of elements of $W$, we added the following lemmas :
@@ -528,13 +521,13 @@ Most of the properties of double cosets of elements of $G$ can be transferred ov
      \end{cases}
      .\] 
     \end{itemize}
-\end{proprietes} \todo{see wht todo{ (maybe add implementation)} } 
+\end{proprietes} 
 
 \begin{proof}
     These properties follows from \ref{prop:DC1} and \ref{prop:DC2}.
 \end{proof}
 
-We can now use these results to show an important result of the theory of groups with $BN$-pairs : the decomposition. of $G$ in double cosets.
+We can now use these results to show an important result of the theory of groups with $BN$-pairs : the decomposition of $G$ in double cosets.
 
 \begin{theoreme}[Double coset decomposition] \label{thm:DCD}
     The group $G$ is equal to $B N B = \bigcup_{w \in W} C'\left( w \right)$.
@@ -561,7 +554,7 @@ We can now use these results to show an important result of the theory of groups
 
 Let $x,y \in BNB$. There exists $v,w \in W$ such that $x \in C'(v)$ and $y \in C'(w)$. As the set $S$ generates $W$ we have a finite sequence $s_1,\ldots,s_q$ of elements of $S$ such that $v = s_1 \ldots s_q$ and by the above lemma $xy \in C(v).C(w) \subset \bigcup_{1 \le i_1 < ... < i_p \le q} C(s_1\ldots s_q w) \subset BNB$.
 
-Thus $BNB$ is a subgroup of $G$ that contains both $B$ and $N$, so it is equal to $G$.
+Therefore $BNB$ is a subgroup of $G$ that contains both $B$ and $N$, so it is equal to $G$.
 \end{proof}
 
 The group $BNB$ appear in the document \lean{basic.lean} as 
@@ -571,7 +564,7 @@ def BNB : Subgroup G where
   ...
 \end{leancode}
 
-We formalized the theorem \ref{thm:DCD} as well as lemma \ref{lem:BWB} as  following :
+We formalized the theorem \ref{thm:DCD} as lemma \ref{lem:BWB} as  following :
 \begin{leancode}
 theorem doubleCosetDecomp : ⊤ = BNB TS
 
@@ -589,7 +582,7 @@ theorem doubleCosetDecomp' (g : G) : ∃ w, g ∈ TS.C' w
 
 \subsection{Example : the general linear group}
 \label{sub:GL}
-For this section we fix a natural number $n$ and a field $F$.
+For this section we fix a natural number $n \ge 2$ and a field $F$.
 In a similar fashion, in lean we fix : 
 \begin{leancode}
 variable {F : Type*} [Field F] [DecidableEq F] 
@@ -597,7 +590,7 @@ variable {n : Type*} [Fintype n] [DecidableEq n]
 \end{leancode}
 
 \begin{notation}
-    We will denote as $GL_n(F)$ the \emph{general linear groups} \textit{i.e.} the groups of invertible $n \times n$ matrices over the field $F$. In \Lean this groups is denoted \lean{GL n F} and is defined as the group of units of the ring \lean{Matrix n n F} of matrices idexed by the type \lean{n} with coefficients in \lean{F}.
+    We will denote as $GL_n(F)$ the \emph{general linear groups} \textit{i.e.} the groups of invertible $n \times n$ matrices over the field $F$. In \Lean this groups is denoted \lean{GL n F} and is defined as the group of units of the ring \lean{Matrix n n F} of matrices indexed by the type \lean{n} with coefficients in \lean{F}.
 \end{notation} 
 
 The goal of this section is to show that the general linear group $GL_n\left( F \right)$ admits a $BN$-pair by showing that it has a $BN\pi$-triplet structure. In order to do so, we first need to define the notion of monomial matrices.
@@ -611,7 +604,7 @@ The goal of this section is to show that the general linear group $GL_n\left( F 
 \end{propriete}
 
 \begin{proof}
-    First, the identity matrix is monomial. Next, let $M = \left( m_{i,j} \right)_{i,j \in \{1,\ldots,n\}}$ and $N =\left( n_{i,j} \right)_{i,j \in \{1,..,n\}}$ be monomial matrices. Let $i \in \{1,..,n\}$ and $k_i$ denote the only nonzero coefficient of the $i-$th line of $M$. Then, $p_{i,j}$the coefficient $(i,j)$ of the matrix $P:= M*N$ is equal to $p_{i,j} = \sum_{k=1}^{n} m_{i,k}n_{k,j} = m_{i,k_i}n_{k_i, j}$ for all $j \in \{1,\ldots,n\}$. Hence, $P$ has only one nonzero coefficient on the $i$-th line : the coefficient on the $j_{k_i}-$th line ; where $j_{k_i}$ is the only nonzero coefficient on the $k_i-$th line of $N$.\\
+    First, the identity matrix is monomial so $I_n \in N_n(F)$. Next, let $M = \left( m_{i,j} \right)_{i,j \in \{1,\ldots,n\}}$ and $N =\left( n_{i,j} \right)_{i,j \in \{1,..,n\}}$ be monomial matrices. Let $i \in \{1,..,n\}$ and $k_i$ denote the only nonzero coefficient of the $i-$th line of $M$. Then, $p_{i,j}$the coefficient $(i,j)$ of the matrix $P:= M \times N$ is equal to $p_{i,j} = \sum_{k=1}^{n} m_{i,k}n_{k,j} = m_{i,k_i}n_{k_i, j}$ for all $j \in \{1,\ldots,n\}$. Hence, $P$ has only one nonzero coefficient on the $i$-th line : the coefficient on the $j_{k_i}-$th line ; where $j_{k_i}$ is the only nonzero coefficient on the $k_i-$th line of $N$. By a similar reasoning on columns we obtain that $P$ is a monomial matrix.\\
     Finally, the calculations above show that the matrix $M' = \left( m'_{i,j} \right)_{i,j \in \{1,\ldots,n\}}$ defined by $m'_{i,j} = 1 /{m_{j,i}}$ if $m_{j,i} \neq 0$ and $0$ otherwise is the inverse of $M$ and is monomial.
 \end{proof}
 
@@ -627,9 +620,13 @@ def MonomialGroup : Subgroup (GL n F) where
   carrier := {M : GL n F | Monomial M.val}
     ...
 \end{leancode}
+
+\begin{comment}
+    In the above code, the term \lean{M.val : Matrix n n F} designates the underlying matrix of the invertible matrix \lean{M : GL n F}.
+\end{comment}
 \end{implementation}
 
-The group $N_n\left( F \right)$ will serve as the $N$ subgroup of the $BN\pi$-triplet over $GL_n(F)$. Now let us define the $B$ subgroup.
+The group $N_n\left( F \right)$ will serve as the $N$ subgroup of the $BN\pi$-triplet over $GL_n(F)$. We will now define the $B$ subgroup.
 
 \begin{definition}[Triangular group]
     The \emph{(upper) triangular group} $B_n\left( F \right)$ is the subgroup of $GL_n\left( F \right)$ made of the invertible upper triangular matrices.
@@ -639,18 +636,19 @@ The group $N_n\left( F \right)$ will serve as the $N$ subgroup of the $BN\pi$-tr
 Unless explicitly stated otherwise a triangular matrix denotes an \emph{upper} triangular matrix.
 \end{remarque}
 
-The implementation of this group in \Lean is based on the formalization of block triangular matrices, coded in by \ref{oui oui la réf} as follows :
+The implementation of this group in \Lean is based on the formalization of block triangular matrices, which is already coded in \Mathlib (see \href{https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/Block.html#Matrix.BlockTriangular}{here}) as follows :
 \begin{leancode}
 variable {α : Type*} [LT α]
 def Matrix.BlockTriangular (M : Matrix n n F) (b : n → α) : Prop :=
  ∀ ⦃i j : n⦄, b j < b i → M i j = 0
 \end{leancode}
 
-\begin{commentary}
-First, we introduce a type \lean{α : Type*} with an \lean{[LT α]} instance.  What it means is that we endowed the \lean{α} with a binary relation \lean{< : α → α → Prop} with no particular property.
-\end{commentary}\todo{might be going to annex} 
+\begin{commentary}\
 
-With this we define the groups of block triangular matrices (which depends on the block decomposition given by the parameter \lean{b : n → α} :
+In the code above, the type \lean{α : Type*} is associated with a \lean{[LT α]} instance. This type class instance endows \lean{α} with a binary relation \lean{< : α → α → Prop} with no particular property.
+\end{commentary}
+
+With this we define the groups of block triangular matrices (which depends on the block decomposition given by the parameter \lean{b : n → α}) :
 
 \begin{leancode}
 def BlockTriangularGroup (b : n → α ) : Subgroup (GL n R) where
@@ -658,21 +656,20 @@ def BlockTriangularGroup (b : n → α ) : Subgroup (GL n R) where
   ...
 \end{leancode}
 
-\todo{CompleteLinearOrder} 
-Finally, we endow the type \lean{n} with a \lean{[CompleteLinearOrder n]} instance whose property are explained in \todo{annex} and we define the group of triangular matrices as : 
+Now, we endow the type \lean{n} with a \lean{[LinearOrder n]} instance, doing this endows \lean{n} with a \emph{total} order \lean{≤}. We then define the group of triangular matrices as : 
 \begin{leancode}
-variable [CompleteLinearOrder n] 
+variable [LinearOrder n] 
 def  TriangularGroup : Subgroup (GL n F):= BlockTriangularGroup id
 \end{leancode}
 where \lean{id : n → n} is the identity map. 
 
 Finally, let us define $\pi$ homomorphism that forms the $BN\pi$-triplet over $GL_n(F)$.
 
-If $M \in  \mathfrak{GL}_n\left( F \right)$ is a monomial matrix, let $f : \{1\ldots,n\} \to  \{1,\ldots,n\}$ be the map that to $j \in \{ 1,\ldots,n\}$ associate the index $f(j)$ such that $M_{f(j), j} \neq 0$, then
+If $M \in  GL_n\left( F \right)$ is a monomial matrix, let $f : \{1\ldots,n\} \to  \{1,\ldots,n\}$ be the map that to $j \in \{ 1,\ldots,n\}$ associate the index $f(j)$ such that $M_{f(j), j} \neq 0$, then
 
 \begin{lemme}
     \begin{enumerate}
-        \item $f \in \mathfrak{S}_n$
+        \item $f$ belongs to the permutation group $\mathfrak{S}_n$ over $\{1,\ldots,n\}$.
         \item the map 
             \begin{align*}
                 \pi : N_n\left( F \right) &\longrightarrow \mathfrak{S}_n \\
@@ -685,9 +682,25 @@ If $M \in  \mathfrak{GL}_n\left( F \right)$ is a monomial matrix, let $f : \{1\l
     The first point is immediate by definition of a monomial matrix and the second follows from the calculations performed in the proof \ref{prop:monomial} to show that $N_n\left( F \right)$ is closed by product.
 \end{proof}
 
+The above map is implemented in the \lean{Monomial.lean} file as follows :
+\begin{leancode}
+def Matrix.toPermFun {M : Matrix n n F} (hM : Monomial M) : n → n :=
+  fun j ↦ Classical.choose (hM.2 j).exists_list_transvec_mul_mul_list_transvec_eq_diagonal
 
-\todo{foramlisation} 
+def Matrix.toPerm {M : Matrix n n F} (hM : Monomial M) : Perm n where
+  toFun := Matrix.toPermFun hM
+  ...
 
+def toPermHom : (MonomialGroup : Subgroup (GL n F)) →* Perm n where
+  toFun := fun M => toPerm M.2
+  ...
+\end{leancode}
+
+\begin{commentary}
+    In the above code we first define the function $f$ as \lean{Matrix.toPermFun} for matrices which are monomial. Then \lean{Matrix.toPerm} lift it to an element of \lean{Perm n}, the type of permutation on \lean{n}. Finally, \lean{toPermHom} lift \lean{Matrix.toPerm} a group homomorphism from \lean{MonomialGroup : Subgroup (GL n F)} to \lean{Perm n}.
+\end{commentary}
+
+We can now state the following theorem :
 
 \begin{theoreme} \label{thm:GL}
     The subgroups $B_n\left( F \right)$ and $N_n\left( F \right)$ alongside the group homomorphism $\pi : N \to \mathfrak{S}_n$ form a $BN\pi$-triplet over $GL_n\left( F \right)$.
@@ -709,7 +722,7 @@ Immediately we have the following property :
     It is immediately clear that the permutation matrices are monomial and that the map $P$ is injective. Then, the multiplicativity of $P$ can be verified through simple computations.
 \end{proof}
 
-In \Lean we first define the map $P$ as the function \lean{PermMatrix : Perm n → Matrix n n F}, then we endow it with a monoid homomorphism \lean{_PermMatrix_Hom : Perm n →* Matrix n n F}. This monoid homomorphism is then lifted to a group homomorphism from \lean{Perm n} to the group of units of \lean{Matrix n n F}, that is \lean{GL n F := (Matrix n n F)ˣ} which is called \lean{PermMatrix_Hom : Perm n → GL n F}. Finally, \lean{PermMatrixGroup : Subgroup (GL n F)} the group of permutation matrices is defined as the range of that last homomorphism and by restricting this same morphism to its range we obtain the group homomorphism \lean{PermMatrix_Hom' : Perm n →* PermMatrixGroup}.
+In \Lean we first define the map $P$ as the function \lean{PermMatrix : Perm n → Matrix n n F}, then we endow it with a monoid homomorphism \lean{_PermMatrix_Hom : Perm n →* Matrix n n F}. This monoid homomorphism is then lifted to a group homomorphism from \lean{Perm n} to the group of units of \lean{Matrix n n F}, that is \lean{GL n F := (Matrix n n F)ˣ} called \lean{PermMatrix_Hom} \lean{ : Perm n →* GL n F}. Finally, \lean{PermMatrixGroup : Subgroup (GL n F)} the group of permutation matrices is defined as the range of that last homomorphism and by restricting this same morphism to its range we obtain the group homomorphism \lean{PermMatrix_Hom' : Perm n →*} \lean{PermMatrixGroup}.
 \begin{leancode}
 /--The permutation matrix associated to a permutation `f`.-/
 def PermMatrix (f : Perm n) : Matrix n n F := 
@@ -733,15 +746,15 @@ def PermMatrix_Hom' : Perm n →* (PermMatrixGroup :Subgroup (GL n F)) :=
 
 \end{leancode}
 
-
+Now let us show that $\left( B_n(F),N_n(F), \pi \right)$ verify the $BN\pi$-triplet axioms.
 
 \begin{enumerate}
-    \item \label{GL1} Now let us prove that $GL_n\left( F \right)$ is generated by $B_{n}\left( F \right)$ and $N_n\left( F \right)$. To do so, we will use the following result \footnote{For the definition of transvection matrices and some of their properties go to \ref{yes l anneks} and for a proof of this lemma see \cite{oui oui la re}.} : 
+    \item \label{GL1} First we prove that $GL_n\left( F \right)$ is generated by $B_{n}\left( F \right)$ and $N_n\left( F \right)$. To do so, we will use the following result \footnote{For the definition of transvection matrices and a proof of this lemma see \cite{oui oui la re}.} : \todo{that}
 
 \begin{lemme} \label{lem:trans}
     Every matrix in $GL_n\left( F \right)$ can be written as a product of transvection matrices, an invertible diagonal matrix and transvection matrices.
 \end{lemme}
-This lemma appears in \Lean as :
+This \href{https://leanprover-community.github.io/mathlib4_docs/Mathlib/LinearAlgebra/Matrix/Transvection.html#Matrix.Pivot.exists_list_transvec_mul_mul_list_transvec_eq_diagonal}{lemma} appears in the \Mathlib library as :
 \begin{leancode}
 theorem Matrix.Pivot.exists_list_transvec_mul_mul_list_transvec_eq_diagonal 
   (M : Matrix n n F) : ∃ (L : List (Matrix.TransvectionStruct n F)) 
@@ -765,22 +778,29 @@ theorem MonomialTriangular_gen_GL :
 
     Secondly, a matrix $M \in GL_n(F)$ belongs to the kernel of $\pi$ if and only if for all index $i \in  \{ 1,..,n\}$ the only nonzero coefficient on the $i$-th line are the diagonal ones \textit{i.e.} if and only if $M \in T_n\left( F \right)$. Therefore, $T_n\left( F \right) = B_n\left( F \right) \cap N_n(F)$.
 
-    Hence, by transitivity of the equality relation we have $\ker \pi = Bn(F) \cap N_n(F)$. That statement in accessed through :
+    Hence, by transitivity of the equality relation we have $\ker \pi = Bn(F) \cap N_n(F)$. That statement is accessed through :
     \begin{leancode}
 theorem ker_toPermHom_eq_Diagonal :
   toPermHom.ker = TriangularGroup.subgroupOf (MonomialGroup :Subgroup (GL n F))
     \end{leancode}
     
 
-\item \label{GL3}We will now show that $\pi : N \to \mathfrak{S}_n$ is surjective. We will do it by showing that $P : f \mapsto P_f $ is a right section of $\pi$. Indeed, for all $f \in \mathfrak{S}_n$ we saw that the only nonzero coefficient of the $i$-th line, for $i=1,...,n$, is $f(i)$. Therefore, $\pi\left( P_f \right) = f$ and $\pi$ is surjective.We formalized this result in \Lean as:
+\item \label{GL3}We will now show that $\pi : N_n(F) \to \mathfrak{S}_n$ is surjective. We will do it by showing that $P : f \mapsto P_f $ is a right section of $\pi$. Indeed, for all $f \in \mathfrak{S}_n$ we saw that the only nonzero coefficient of the $i$-th line, for $i=1,...,n$, is $f(i)$. Therefore, $\pi\left( P_f \right) = f$ and $\pi$ is surjective.We formalized this result in \Lean as:
 \begin{leancode}
 theorem toPermHom_surj :
   Function.Surjective (toPermHom : (MonomialGroup : Subgroup (GL n F)) →* Perm n)
 \end{leancode}
 
-\item A simple induction on $n$ shows that $\mathfrak{S}_n$ is generated by the set $S:= \{\left( i,i+1 \right) | 1\le i\le n-1\}$ and transposition being of order $2$, this proves the fourth point. \todo{Lean implemenation}
+\item A simple induction on $n$ shows that $\mathfrak{S}_n$ is generated by the set $S:= \{\left( i,i+1 \right) | 1\le i\le n-1\}$ and transposition being of order $2$, this proves the fourth point. 
 
-\item Let $i \in  \{ 1,..,n-1\}$ and $M_i \in N_n(F)$ maps to $\left( i,i+1 \right)$ through $\pi$. By \ref{GL2} and \ref{GL3} there exists $D \in T_n(F)$ such that $M_i = P_{((i,i+1)} D$. Therefore, $M_i B_n(F) M_i \neq B_n(F)$ if and only if $P_{i} B_n(F) P_{i}\neq B_n(F)$, where $P_i$ denotes the permutation matrix $P_{(i,i+1)}$. As seen in \ref{GL1}, the transvection matrix $T_{i+1,i}(1)$ is equal to $P_{i} T_{i,i+1}(1) P_{i} \in P_{i}B_n(F) P_{i}$. However, $T_{i+1, i}(1)$ is not upper triangular and hence $P_{i} B_n(F) P_{i} \neq B_n(F)$.
+To formalize the definition of the set $S$ (denoted \lean{SuccSwapSet : Set (Perm n)} in \Lean) we need to endow \lean{n} with a \lean{[SuccOrder n]} instance. We then obtain a successor function \lean{succ : n → n} that verifies the following axioms \lean{le_succ : ∀ (a : n), a ≤ succ a}, \lean{ succ_le_of_lt : ∀ {a b : n}, a < b → succ a ≤ b} and \lean{ le_of_lt_succ} ~\lean{: ∀ {a b : n}, a < succ b → a ≤ b} and such that \lean{succ i = i} if and only if \lean{i : n} is a maximal element of \lean{n}.
+    We formalize the set $S$ and the above result as :
+\begin{leancode}
+def SuccSwapSet : Set (Perm n) := {f | ∃ i, i < succ i ∧ f = swap i (succ i) }
+theorem top_eq_succ_swap_closure :⊤ = Subgroup.closure (SuccSwapSet : Set (Perm n))
+\end{leancode}
+
+\item Let $i \in  \{ 1,..,n-1\}$ and $M_i \in N_n(F)$ maps to $\left( i,i+1 \right)$ through $\pi$. By \ref{GL2} and \ref{GL3} there exists $D \in T_n(F)$ such that $M_i = P_{(i,i+1)} D$. Therefore, $M_i B_n(F) M_i \neq B_n(F)$ if and only if $P_{i} B_n(F) P_{i}\neq B_n(F)$, where $P_i$ denotes the permutation matrix $P_{(i,i+1)}$. As seen in \ref{GL1}, the transvection matrix $T_{i+1,i}(1)$ is equal to $P_{i} T_{i,i+1}(1) P_{i} \in P_{i}B_n(F) P_{i}$. However, $T_{i+1, i}(1)$ is not upper triangular and hence $P_{i} B_n(F) P_{i} \neq B_n(F)$.
 
     This result appears in our code as :
 \begin{leancode}
@@ -795,9 +815,9 @@ theorem left_right_mul_Triangular_neq_Triangular_of_map_swap {Ma : MonomialGroup
 
 \item The final point of the proof is the hardest to prove. We introduce $i \in \{1,\ldots,n-1\}$ and $M_i \in N_n(F)$ as above and we fix a monomial matrix $M \in N_n(F)$. 
 
-    Let us show that $M_i B_n(F) M \subset C(M_iM) \cup C(M) $. Thanks to a reasoning similar to the one above, we only have to prove that  $P_{i} B_n(F) M \subset C\left( P_i M \right)\cup C(M)$ or in an equivalent manner $P_i B_n(F) \subset B_n(F) P_i B'_n(F) \cup B_n(F) B'_n(F) $ where $B'_n(F) := M B_n(F)M^{-1}$.
+    Let us show that $M_i B_n(F) M \subset C(M_iM) \cup C(M) $. Thanks to a reasoning similar to the one above, we only have to prove that  $P_{i} B_n(F) M \subset C\left( P_i M \right)\cup C(M)$ or equivalently $P_i B_n(F) \subset B_n(F) P_i B'_n(F) \cup B_n(F) B'_n(F) $ where $B'_n(F) := M B_n(F)M^{-1}$.
 
-    Let us define as $G_i$ the subgroup of $GL_n(F)$ consisting of the block diagonal matrices of the form 
+    Let us denote as $G_i$ the subgroup of $GL_n(F)$ consisting of the block diagonal matrices of the form 
     $$\begin{pmatrix} 
         I_{i-1} \\
         & M\\
@@ -805,21 +825,24 @@ theorem left_right_mul_Triangular_neq_Triangular_of_map_swap {Ma : MonomialGroup
     \end{pmatrix}$$
     for $M \in GL_2\left( F \right)$.
 
-    \todo{implemenation} 
-    The group $G_i$ is very clearly isomorphic to $GL_2\left( F \right)$ and $P_i = 
+    This group appear in \Lean as \lean{Gi hii : Subgroup (GL n F)} where \lean{hii : i < succ i} is a proof that an implicit variable \lean{i : n} is less than its successor. The condition \lean{hii} is the natural way to translate in \Lean the condition $i<n$.
+
+    The group $G_i$ is clearly isomorphic to $GL_2\left( F \right)$ and $P_i = 
     \left(\begin{smallmatrix}
         I_{i-1} \\ & 0 & 1 \\ & 1 & 0 \\ & & & I_{n-i-1}
     \end{smallmatrix} \right ) \in G_i$.
 Additionally, some simple but very annoying to formalize computations show that $G_i B_n(F) \subset B_n(F) G_i$ and hence $P_i B_n(F) \subset B_n(F) G_i$ so we only need to prove that : 
     $$G_i \subset \left(B_n(F) \cap G_i\right) \ P_i \ \left( B'_n(F) \cap  G_i\right) \ \bigcup \ \left(B_n(F) \cap G_i\right) \ \left(B'_n(F) \cap G\right).$$
 
-    Let $\psi$ denote the natural isomorphism from $GL_2(F)$ to $G_i$. In Lean we formalized it as \lean{GL2toG2ij hij : GL (Fin 2) F ≃* (G2ij hij : Subgroup (GL n F)}\todo{probably ti modifiy} To do so we first observe that that $\psi^{-1} \left(B_n(F) \cap G_i \right)$ is the group $B_2\left( F \right)$ of $2 \times 2$ triangular matrices and that $B'_2(F) := \psi^{-1}\left( B'_n(F) \cap G_i \right)$ is either the upper or the lower triangular subgroup of $GL_2\left( F \right)$ depending on whether $\phi\left( M \right) (i) < \phi\left( M \right) (i+1)$ or the opposite.
+    Let $\psi$ denote the natural isomorphism from $GL_2(F)$ to $G_i$. In Lean we formalized it as \lean{GL2toG2ij hij : GL (Fin 2) F ≃* (Gi hii : Subgroup (GL n F)}. To do so we first observe that that $\psi^{-1} \left(B_n(F) \cap G_i \right)$ is the group $B_2\left( F \right)$ of $2 \times 2$ triangular matrices and that $B'_2(F) := \psi^{-1}\left( B'_n(F) \cap G_i \right)$ is either the upper or the lower triangular subgroup of $GL_2\left( F \right)$ depending on whether $\pi\left( M \right) (i) < \pi\left( M \right) (i+1)$ or the opposite.
+
+    
 
 In the first case we need to show that $$GL_2(F) = B_2(F) \cup B_2(F) s B_2 (F)$$ with $s = \left( \begin{smallmatrix}
     0 & 1 \\
     1 & 0
 \end{smallmatrix} \right)$.
-However as seen in \todo{complements on double cosets}, $B_2(F) \cup B_2(F) s B_2 (F)$ is a subgroup of $GL_2(F)$ which additionally contains both $B_2(F)$ and $N_2(F)=\{1,s\}$ so as shown in \ref{GL1} it is equal to $GL_2(F)$.
+It is easy to verify using \ref{prop:DC2} that $B_2(F) \cup B_2(F) s B_2 (F)$ is a subgroup of $GL_2(F)$. Additionally, it contains both $B_2(F)$ and $N_2(F)=\{1,s\}$ so as shown in \ref{GL1} it is equal to $GL_2(F)$.
 
 In the second case we have to show that $GL_2 (F) = B_2(F) B_2^{-}(F) \cup B_2(F) s B_2^{-} (F)$ where $B_2^{-}\left( F \right)$ denotes the lower triangular group of $GL_2(F)$. This result is immediate follows from the precedent one by remarking that $B^{-}(F) = s B_2(F) s$.
 
@@ -854,7 +877,7 @@ def GeneralLinearGroup_BNpiTriplet : BNpiTriplet (GL n F) (Perm n) where
 \end{proof}
 
 \section{Some results on groups with a $BN$-pair}
-
+\label{sec:somres}
 This section present some of the main results that have been formalized on groups with $BN\pi$-triplet during this internship. However, as it will be discussed in \ref{subsub:Coxeter2} all of the results necessary to prove the simplicity theorem \ref{thm:simple} have been proven due to the need for a more advanced theory of Coxeter groups than the one currently available in Mathlib. Thus, most of the results presented in this part will not be proven.
 
 This section first starts by presenting a way to endow with a $BN\pi$-triplet certain quotients of groups with $BN\pi$-triplet. Then after an introduction to the theory of Coxeter groups, we will the link of such groups with groups with $BN\pi$-triplet. Finally, a few results concerning the subgroups of $G$ that contains $B$ or one of its conjugates will be exposed. 
@@ -867,8 +890,7 @@ This section first starts by presenting a way to endow with a $BN\pi$-triplet ce
 $\left( \hat{B},\hat{N},\hat{\pi} \right)$ forms a $BN\pi$-triplet over $\hat{G}$ called the quotient $BN\pi$-triplet of $\left( B,N, \pi \right)$ by $Z$.
 \end{definition}
 
-\todo{see if proof} 
-If proving this theorem does not require much efforts \footnote{And we incite the reader to do so}, formalizing it is a bit more arduous. That is why we introduced the equivalent structure of image $BN\pi$-triplet :
+ If proving this theorem does not require much efforts \footnote{And we incite the reader to do so}, formalizing it is a bit more arduous. That is why we introduced the equivalent structure of image $BN\pi$-triplet :
 
 \begin{definition}[Image $BN\pi$-triplet]
 Let $G'$ be a group, $p$ a surjective homomorphism from $G$ to $G'$ and $\pi': p(N) \to W$ a group homomorphism. If $\ker p \le B$ and $\pi' \circ p = \pi$ then $\left( p(B), p(N), pi' \right)$  forms a $BN\pi$-triplet over $G'$ called the image $BN\pi$-triplet of $(B,N, \pi)$ by $p$.
@@ -922,16 +944,14 @@ def ProjectiveGeneralLinearGroup_BNpiTriplet : BNpiTriplet (PGL n F) (Perm n) :=
     This subsection first presents the definition and some basic properties as well as the \Lean implementation of Coxeter groups, and then the link with groups with $BN\pi$-triplet is discussed.
 
 \subsubsection{Introduction to Coxeter theory}
-We first recall \ref{sub:presentation} \todo{le pres} 
-
 Let $W$ be a group and $S$ a subset of elements of order $2$ of $W$.
 For all two elements $s, s' \in  S$, we define $m(s,s') \in  \mathbb{N}$ to be the order of the product $ss'$ if it is finite and $0$ otherwise.
 
 \begin{definition}[Coxeter system]
-    We say that the couple $(W,S)$ is a \emph{Coxeter system} if the generating set $S$ alongside with the relations $(ss')^{m\left( s,s' \right)} = 1$ for all $s,s' \in S$, forms a presentation of $W$. 
+    We say that the couple $(W,S)$ is a \emph{Coxeter system} if the generating set $S$ alongside with the relations $(ss')^{m\left( s,s' \right)} = 1$ for all $s,s' \in S$, forms a presentation of $W$.
 \end{definition}
 
-When $\left( W,S \right)$ is a Coxeter system, the elements of $S$ are called simple (reflections) and by an abuse of language \todo{not sure}, $W$ is called a \emph{Coxeter group}.
+When $\left( W,S \right)$ is a Coxeter system, the elements of $S$ are called simple (reflections) and by an abuse of language, $W$ is called a \emph{Coxeter group}.
 
 \begin{ex}\
 
@@ -981,7 +1001,6 @@ In Lean, if \lean{M} has type \lean{CoxeterMatrix A} for a certain type \lean{A}
     \item $\left( W,S \right)$ is a Coxeter system if and only if there exists a set $A$ and a Coxeter matrix $M$ of type $A$, and an isomorphism $f : G\left( M \right) \to W$ sending bijectively $A$ to $S$. 
     %\item Let $\left( W,S \right)$ and $\left( W', S' \right)$ be two Coxeter systems such that there exists a Coxeter matrix $M$ of type $A$, and groups isomorphisms $f : G(M) \to  W$ and $f' : G\left( M \right) \to W'$ sending $A$ to $S$ ad $S'$ respectively. Then there exists a group isomorphism $ \phi : W \to W'$ sending 
 \end{enumerate}
-        %\todo{bien faire}
 \end{propriete}
    
 \begin{proof}
@@ -1002,13 +1021,15 @@ structure CoxeterSystem {A : Type*} (M : CoxeterMatrix A) (W : Type*)
 
 
 \subsubsection{BN-pairs and Coxeter theory}
-\label{subsub:Coxeter2} \todo{Petit paragraphe} 
+\label{subsub:Coxeter2} 
+
+This subsection details the relations between Coxeter groups and groups with $BN$-pair, they all derives from the following theorem :
 \begin{theoreme} \label{thm:Coxeter}
     $\left( W,S \right)$ is a Coxeter system.
 \end{theoreme}
  The proof of the above theorem can be found in \ref{bourbaki_groupes_2007} §2 n°4 and is a consequence of the decomposition of $G$ in double cosets (see theorem \ref{thm:DCD}). However, like many of the results that will be described from now on, it makes a heavy use of parts of the theory of Coxeter groups that are not yet in implemented in \Lean. 
     
- As proving all the results needed might necessitate a whole other internship by itself, it was decided to leave the task of proving them to other and focus the goal of proving the simplicity theorem (theorem \ref{thm:simple}). The \Lean code is therefore filled with holes. However, every proof that did not make a direct use of the Coxeter group theory has been formalized, and the full list of the necessary results and where they are needed in the code is available in \todo{ouiiii}. 
+ As proving all the results needed might necessitate a whole other internship by itself, it was decided to leave the task of proving them to other and focus the goal of proving the simplicity theorem (theorem \ref{thm:simple}). The \Lean code is therefore filled with holes. However, every proof that did not make a direct use of the Coxeter group theory has been formalized, and the full list of the necessary results and where they are needed in the code is available on \href{https://github.com/corent1234/BNpairs}{github}.
 
  Additionally, proving the result mathematically in this report would not be of great interest, as it would either necessitate a large amount on the Coxeter group theory to be exposed -which was not the object of this internship- or that the proofs given would be filled with references to other works. That is why what follows will mostly consists in definitions and statements of theorems with the notable exception of theorem \ref{thm:simple}.
 
@@ -1060,7 +1081,7 @@ The importance of these groups appears in the following theorem :
      
     The map \vspace{-0.2cm}
 \begin{align*}
-\mathcal{P}\left( S \right) &\longrightarrow \{\text{Parabolic subgroups of $G$}\} \\
+\mathcal{P}\left( S \right) &\longrightarrow \{\text{Subgroups of $G$ containing $B$}\} \\
 X &\longmapsto G_X 
 .\end{align*}
     is bijective. 
@@ -1075,10 +1096,12 @@ Now we introduce the definition of parabolic subgroups as below :
 \end{definition}
 
 \begin{implementation} \
+    The defnition of Parabolic subgroups is formalized as :
 \begin{leancode}
 def Subgroup.Parabolic (P : Subgroup G) : Prop := ∃g, ConjugatedSubgroup TS.B g ≤ P
 \end{leancode}
-\end{implementation} \todo{ConjugatedSubgroup} 
+where \lean{ConjugatedSubgroup TS.B g : Subgroup G} is the subgroup of \lean{G} with \lean{carrier := {w} * B.carrier * {w⁻¹}}.
+\end{implementation} 
 
 Before, stating the only result on parabolic groups of this report we will recall the definition of the normalizer of a groups.
 
@@ -1093,39 +1116,25 @@ The normalizer of an object \lean{H : Subtype G} is denoted \lean{H.normalizer :
 
 This theorem as been formalized as \lean{eq_normalizer_of_parabolic {P : Subgroup G} (h : P.Parabolic TS) : P = P.normalizer}. This theorem as well the following lemma will be used to prove \ref{thm:simple}. This last moreover, more of a technical lemma to prove \ref{thm:simple} than an actual result.
 
-\begin{lemme} \ref{lem:2}
+\begin{lemme} \label{lem:2}
 Let $H \triangleleft G$. There exists $X \subset S$ such that $BH = G_X$ and every element of $X$ commute with every element of $S \setminus X$.
 \end{lemme}
 
 \section{The simplicity theorem}%
-\label{sec:The simplicity theorem}
+\label{sec:simple}
 
 In this section we state and prove a theorem that can be used to show that groups with $BN\pi$-triplet are simple when applicable. Then we apply this theorem to case of the projective special linear group over a field.
 
 \subsection{The theorem}
-Before stating the theorem, we will recall two definitions from group theory.
 
-\begin{definition}
-    A group is \emph{simple} if it has exactly two normal subgroups : the trivial subgroup and itself.
-\end{definition}
-
-In \Lean a group \lean{Γ} is simple if it is endowed with an \lean{IsSimpleGroup Γ} instance.
-
-\begin{definition}
-    A group $\Gamma$ is said \emph{perfect} if equal to its derived subgroup.
-\end{definition}
-
-In \Lean the derived subgroup of a group \lean{Γ} is denoted \lean{⁅⊤, ⊤⁆ : Subgroup Γ}. 
-    
-
-    Now, let $U$ be a normal subgroup of $B$. We define $Z$ to as the group $Z := \bigcap_{g \in G} g B g^{-1}$, and we denote as  $G_1$ the subgroup $G_1 := \bigsqcup_{g \in G} g U g^{-1}$ of $G$.
+    Let $U$ be a normal subgroup of $B$. We define $Z$ to as the group $Z := \bigcap_{g \in G} g B g^{-1}$, and we denote as  $G_1$ the subgroup $G_1 := \bigsqcup_{g \in G} g U g^{-1}$ of $G$.
 
 \begin{theoreme} \label{thm:simple}
 If the following conditions are verified :
 \begin{enumerate}
     \item \label{simple1} $B = UT$
     \item \label{simple2} The only perfect quotient group of $U$ is the trivial  group, or in other words for all strict normal subgroup $V$ of $U$,  $U / V \neq  [ U / V, U/V]$.
-    \item \label{simple3}$G_1$ is perfect
+    \item \label{simple3}$G_1$ is perfect \textit{i.e. } $G_1$ is equal to its derived subgroup $[G_1,G_1]$.
     \item \label{simple4} the Coxeter system $\left( W,S \right)$ is irreducible \textit{i.e.} there is no subset $X$ of $S$ such that every element of $X$ commutes with every element of $S-X$.
 \end{enumerate} 
     then $G_1 / \left( Z \cap G_1 \right)$ is either trivial or simple noncommutative.
@@ -1143,7 +1152,7 @@ If the following conditions are verified :
 
 Let us show that every subgroup $H$ of $G$ normalizing $G_1$ is either contained in $Z$ or contains $G_1$.
 
-    First, let us show that $G_1T$ is equal to $G$. To do so we first need to observe that $G_1T$ is subgroup of $G$ that contains $B$ \tododeux{talk bout prodsubgoup} so by \ref{thm:parabolic} it is its own normalizer. Therefore, as $N$ normalizes $G_1$ and $T$, and so $G_1T$, we have $N \le G_{1}T$. Thus, as $B$ and $N$ generates $G$ we have $G = G_1T$.
+    First, let us show that $G_1T$ is equal to $G$. To do so we first need to observe that $G_1T$ is subgroup of $G$ that contains $B$ so by \ref{thm:parabolic} it is its own normalizer. Therefore, as $N$ normalizes $G_1$ and $T$, and so $G_1T$, we have $N \le G_{1}T$. Thus, as $B$ and $N$ generates $G$ we have $G = G_1T$.
 
     \begin{lemme} \label{lem:subBN}
         Let us set $G' := G_1 H$, $B' := B \cap G'$, $N' := N \cap G'$ and $\pi' := \pi_{|N'}$. 
@@ -1156,7 +1165,8 @@ Let us show that every subgroup $H$ of $G$ normalizing $G_1$ is either contained
             \item The kernel of $\pi' = \pi_{|N'}$ is equal to $\ker pi \cap N' = B \cap N \cap N' = B' \cap N' $.
             \item The surjectivity of $\pi'$ is direct consequence of the surjectivity of $\pi$ and the relations $N=N'T$ and $\ker \pi = T$.
             \item Immediate.
-            \item \todo{finish it} 
+            \item Let us denote as $W'$ the group $W' := \pi (N) =  \Im \pi'$. For all $w \in w'$, we have $Bw'B = Bw'B'$ because $B = B'T$ so $BwB \cap G' = B'w'B'$. The result is then immediate.
+            \item Immediate.
         \end{enumerate}
     \end{proof}
 
@@ -1176,6 +1186,14 @@ The group $G_1$ being perfect, its quotient $G_1 / \left( G_1 \cap H \right)$ al
 Thus $G_1 / \left( G_1 \cap Z \right)$ is simple and as $G_1$ is perfect $G_1 / \left( G_1 \cap Z \right)$ also is and therefore cannot be commutative.
 \end{proof}
 
+The above theorem appears in \Lean as :
+\begin{leancode}
+def BNpiTriplet_SimplictyTheorem'  {U : Subgroup G} (hU : U ≤ TS.B) (hU' : (U.subgroupOf TS.B).Normal) 
+ (hUT : ⊤ = mul_Subgroup' hU' (TS.T.subgroupOf TS.B)) (RU : propR U) (hirred : TS.cs.irreducible)
+  (perfectG1 : ⁅ (⊤ : Subgroup (ConjSubgroup U)), ⊤⁆ = (⊤: Subgroup (ConjSubgroup U)))
+   [Nontrivial (ConjSubgroup U⧸ ((⨅ g, ConjugatedSubgroup TS.B g).subgroupOf (ConjSubgroup U))) ] :
+    IsSimpleGroup (ConjSubgroup U⧸ ((⨅ g, ConjugatedSubgroup TS.B g).subgroupOf (ConjSubgroup U)))
+\end{leancode}
 
 \begin{remark}
     The $BN\pi$-triplet defined in the lemma \ref{lem:subBN} has been formalized in \Lean as :
@@ -1205,21 +1223,21 @@ These groups are (surprisingly) denoted \lean{SL n F} and \lean{PSL n F} in \Lea
 
 \begin{proof}
     Let $U$ denotes the strictly upper triangular group \textit{i.e.} the subgroup of $GL_n(F)$ made of the triangular matrices whose every diagonal entry are $1$. It is a normal subgroup of the triangular matrices. 
-    We set $Z := \bigcap_{g \in G} g B g^{-1}$ and $G_1 := \bigsqcup_{g \in G} g U g^{-1}$. 
+    We set $Z := \bigcap_{M \in GL_n(F)} M B_n(F) M^{-1}$ and $G_1 := \bigsqcup_{M \in GL_n(F)} M U M^{-1}$. 
     First, let us show that $G_1 = SL_n\left( F \right)$. Every element of $G_1$ is blatantly of determinant $1$ so now let us show that $SL_n\left( F \right) \le G_1$ by using the following lemma :
     \begin{lemme}
         $SL_n\left( F \right)$ is generated by the transvection matrices.
     \end{lemme}
 
     \begin{proof}
-        By the lemma \ref{lem:trans}, we only need to prove that diagonal matrices of determinant $1$ can be written as products of tranvection matrices. This is easily proven action operations over the lines and colums (see \todo{annex} for a precise proof).
+        By the lemma \ref{lem:trans}, we only need to prove that diagonal matrices of determinant $1$ can be written as products of tranvection matrices. This is easily proven by operations over the lines and colums.
     \end{proof}
     The transvection matrices being either strictly upper triangular matrices or conjugates of strictly upper triangular matrices by transposition matrices as seen in the point 1 of the proof of \ref{thm:GL}, by the above lemma, $G_1 = Sl_n(F)$.
     Now let us prove that the groups defined above verify the hypothesis of \ref{thm:simple}.
 
     \begin{enumerate}
         \item A simple calculation shows that the diagonal of a product of triangular matrices is the product of their diagonal. Hence, for all triangular matrix $T$, if we denote as $D$ the diagonal the matrix of its diagonal coefficient, which is invertible so in $T_n\left( F \right)$ then the matrix $T' := TD^{-1}$ is strictly upper triangular and therefore $T = T' D \in UT$.
-        \item \todo{yesy yes} 
+        \item By computing the iterated derived subgroups of $U$ one can show that $U$ is solvable, and therefore verifies the second hypothesis of theorem \ref{thm:simple}.
         \item Let us show that $G_1 = SL_n\left( F \right)$ is perfect under the conditions of the theorem by proving that transvection matrices can be written as commutators and using the lemma \ref{lem:trans}.
 
             Let $i,j$ be distinct elements of $n$ and $c$ be an element of $F$.
@@ -1241,7 +1259,11 @@ These groups are (surprisingly) denoted \lean{SL n F} and \lean{PSL n F} in \Lea
             0 & 1 \\ 1 & 0\\
     \end{smallmatrix}
      \right) \in SL_n\left( F \right)$ in $PSL_n(F)$ is nontrivial.
-\end{proof} \todo{implementation} 
+\end{proof} 
+
+\begin{remark}
+    This property has not been fully formalized yet. Especially, formalizing the fact that the hypothesis 2 holds will be challenging.
+\end{remark}
 
 
 
@@ -1255,3 +1277,14 @@ Finally, we end this report by proving that the groups $SL_n(F)$ and $PSL_n(F)$ 
 
     Then, one can verify that the center $Z$ of $SL_n\left( F \right)$ is the group of scalar matrices of determinant $1$, thus is a subgroup of $B_n(F) \cap SL_n\left( F \right)$. Therefore, we can endow $PSL_n(F)$ with the quotient $BN\pi$-triplet of $\left( B_n(F) \cap SL_n(F), N_n(F), \pi \right)$ by $Z$ (see \ref{def:quotBN} for teh definition of quotient $BN\pi$-triplet).
 \end{proof}
+
+\begin{implementation} \
+\begin{leancode}
+def SpecialLinearGroup_BNpiTriplet : BNpiTriplet (Matrix.SpecialLinearGroup n F) (Equiv.Perm n) :=
+  SubBNpiTriplet (GeneralLinearGroup_BNpiTriplet n F) ...
+
+def ProjectiveSpecialLinearGroup_BNpiTriplet :
+  BNpiTriplet (Matrix.ProjectiveSpecialLinearGroup n F) (Equiv.Perm n) :=
+    QuotientBNpiTriplet SpecialLinearGroup_BNpiTriplet ...
+\end{leancode}
+\end{implementation}

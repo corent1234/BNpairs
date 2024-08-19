@@ -8,26 +8,28 @@
 \newcommand*\MapsTo{%
     \to%\raisebox{-0.2em}{\xrightarrow{{\resizebox{1em}{0.3em}{$\sim$}}} }:w
 }
-
+\newcommand\editor{\input{link.tex}}
+\newcommand\Mathlib{\href{https://github.com/leanprover-community/mathlib4}{\lean{mathlib}}}
 \newcommand\tododeux[1]{\color{red} #1} %to put todos without float losts
 \newcommand\Lean{L$\exists\forall$N }
 \newcommand\CFSG{CFSG }
 \begin{document}
-
-    \include{link.tex}%for the link to online lean editor
+    \include{firstpage.tex}
     \listoftodos 
     %only for the first page
+
     %\include{firstpage.tex}
 
     %two little sum ups (french +english) + intro
-    %\include{intro.tex}
+    \include{abstract.tex}
+
+    \input{intro.tex}
+    \input{merci.tex}
     
     %The main content
-    \include{content.tex}
+    \input{content.tex}
     %The conclusions
     
-    %\include{conclusion.tex}
-    \appendix
-
-    %\include{annex.tex}
+    \input{conclusion.tex}
+    \printbibliography
 \end{document}

@@ -1,0 +1,39 @@
+\section*{Introduction} 
+The \emph{classification of finite simple groups} (CFSG) is one of the most important achievements of $20^\text{th}$ century's mathematics. It states (see \cite{wilson_finite_2009} for the exact statement) that the finite simple simple\footnote{We recall here that a groups is said \emph{simple} if it has exactly two normal subgroups : the trivial subgroup and itself.} groups can be sorted into $4$ families :
+\begin{itemize}
+\setlength\itemsep{.3em}
+    \item the cyclic groups of prime order,
+    \item the alternating groups of degree at least $5$,
+    \item the \emph{groups of Lie type},
+    \item the 26 sporadic groups.
+\end{itemize}
+
+    Recent progress in formalization of mathematics has shown abundantly that large and complex theories of mathematics can be formalized in a computer proof assistant (see \cite{buzzard_formalising_2020} or \cite{noauthor_leanprover-communitylean-liquid_2024}).
+The complexity of both the statement and proof of the CFSG makes them perfect candidates for formalization. Formalizing the notion of \emph{group of Lie type} would be an important step in that direction.
+    %Even more so as there is no consensual definition of groups of Lie type. 
+
+    The goal of the internship was to formalize in the \href{https://lean-lang.org/}{\Lean theorem prover} the definition of groups of Lie type, some of their properties and build e concrete examples of such goups.
+
+  \Lean is a functional programming language as well as a proof assistant initially developed by Leonardo de Moura in 2013. In 2017, the \Lean mathematical library \lean{mathlib} was created. It is actively maintained by a motivated community and currently contains more $1.6$ millions of lines of code and nontrivial objects such as schemes were formalized in this library. Recently, the liquid tensor experiment \cite{noauthor_leanprover-communitylean-liquid_2024}, a challenge posed by reknowed mathematician Peter Scholtze to formalize one of its theorem proved to be a success.
+  
+  This makes of \Lean the perfect framework for formalizing the notion of groups of Lie type.
+
+If some of these groups have been known for a long time (Galois constructed the projective special linear groups $PSL_2(F)$ over fields $F$ of prime orders in 1830) the greatest advancement in this theory happened in the 1950s when Claude Chevalley generalized results about complex simple Lie groups to over arbitrary (and especially finite) fields (see \cite{carter_finite_1985}). Examples of such groups are general linear, special linear, symplectic and orthogonal groups and some of their subgroups and quotients (such as special, projective general and projective special linear groups). There exists however no consensual definition of what a group of Lie type is, yet, there is no confusion about the class of finite \emph{simple} groups of Lie type.
+That last fact makes the formalization of these groups even more important as it could allow fix a clear definition for the term.
+
+To achieve this formalization we used the concept of $BN$-pairs, first introduced by Jacques Tits in \cite{tits_algebraic_1964}. $BN$-pairs are structure over groups of Lie type which can be used to prove important results about the structure of the groups, such as simplicity (see §2 of \cite{bourbaki_groupes_2007}). Moreover every \emph{finite} group of Lie type is endowed with a $BN$-pair. That makes them perfect candidate to be used as foundation for the formalization of groups of Lie type. This is why most of this report consists in formalization of properties of groups with $BN$-pairs. This porperties includes the above-mentioned simplicity theorem, construction of the $BN$-pair structure over the general linear group over a field and proof of the simplicity of the special projective general linear groups $PSL_n(F)$ over a field $F$, for $n \ge 3$ or $n = 2$ and $|F| \ge 4$.
+
+
+%Classical references about groups of Lie type are \cite{carter_finite_1985, carter_simple_1972}.
+
+
+    This report starts by a basic introduction to \Lean. The goal of section \ref{sec:lean-intro} is the provide to the reader unfamiliar with \Lean the knowledge necessary to understand the code scattered throughout the report. Reader accustomed with \Lean can simply ignore that part as only basic concept of the language are exposed. It begins with a global presentation of the type system of \Lean then describes with more in detail the types of functions, and of structures as well as the concept of type class. Afterward, follows a brief presentation of two important types of \Lean, \lean{Prop} and \lean{Subgroup}.
+    Thereafter, in section \ref{sec:BN}, $BN$-pairs are defined and the new notion of a $BN\pi$-triplets is introduced. A $BN\pi$-triplet is a structure equivalent to a $BN$-pair but simpler to use in formalizing. Then results about double cosets, sets of the form $BgB$ for $B$ a subgroup and $g$ an element of the group under consideration, are exposed and then used in the next subsection to prove that the general linear group over a field is endowed with $BN$-pair.
+
+    Afterwards, the section \ref{sec:somres} presents some of the properties of groups with $BN$-pairs which were formalized during the internship, such as the notion of quotient $BN\pi$-triplet which allows to endow the projective general linear groups with a $BN\pi$-pair.
+    These properties are then used to prove the simplicity theorem \ref{thm:simple} in section \ref{sec:simple}. This theorem is then applied to the projective special linear group. Finally, we construct the $BN$-pair over the special linear and projective special Linear groups.
+
+
+ This document was written both as an internship report and as a documentation of the code written during the internship.
+
+ Therefore, certain parts of the report might not be of the greatest interest for the reader depending on what they view this document as. Thus, the author would advise, as stated above, for readers familiar with \Lean to ignore the first section and for reader viewing this document as an internship report not to pay too much attention to the technical lemmas specific to the \Lean implementation.

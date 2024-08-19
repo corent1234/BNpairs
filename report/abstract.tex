@@ -1,0 +1,34 @@
+\section*{Abstract}
+
+Mathematics Subject Classification: \href{https://zbmath.org/classification/?q=cc%3A68V15}{68V15 Theorem proving}, \href{https://zbmath.org/classification/?q=cc%3A20D05}{20D05 Finite simple groups and their classification}, \href{https://zbmath.org/classification/?q=cc%3A20D06}{20D06 Simple groups: alternating groups and groups of Lie type} \\
+
+
+\textbf{Français : }\\
+Un groupe de type Lie est un groupe dont la structure est proche de celle d'un groupe de Lie, permettant de généraliser des résultats de la théorie de Lie à des groupes construits sur des corps finis. Ces groupes forment la majorité de la classification des groupes finis simples \cite{wilson_finite_2009}, ce qui les rend particulièrement dignes d'intérêt.
+
+Nous formalisons dans ce rapport la notion de groupes de type Lie à l'aide du prouveur de théorèmes \Lean. Pour ce faire, nous utilisons la notion de $BN$-paire introduite par Jacques Tits dans \cite{tits_algebraic_1964}. Une $BN$-paire est une paire $\left( B, N \right)$ de sous-groupes d'un groupe $G$ de type Lie répondant à certaines propriétés et qui permet de déduire d'importants résultats sur la structure du groupe.
+
+Nous décrivons ici l'implémentation en \Lean de cette notion ainsi que celle de la construction de la structure de $BN$-paire sur le groupe linéaire général sur un corps. Nous montrons également que cette dernière permet de doter les groupes projectif linéaire général, spécial linéaire et projectif spécial linéaire d'une telle structure. De plus, nous implémentons une méthode permettant de démontrer la simplicité de certains groupes possédant une $BN$-paire. Ce résultat est ensuite appliqué au cas du groupe projectif linéaire sur un corps $F$, $PSL_n(F)$, dans les cas où $n \geq 3$ ou $n = 2$ et $|F| \geq 4$, démontrant ainsi sa simplicité dans \Lean.\\
+  %Cette dernière établit la liste exaustive de tous les groupes fini simples. Ce théorème p
+
+    \textbf{English}\\
+
+A group of Lie type is a group whose structure is close to that of a Lie group, allowing the generalization of results from Lie theory to groups constructed over finite fields. These groups form the majority of the classification of finite simple groups \cite{wilson_finite_2009}, which makes them particularly noteworthy.
+
+In this report, we formalize the notion of groups of Lie type using the theorem prover \Lean. To achieve this, we utilize the concept of a $BN$-pair, introduced by Jacques Tits in \cite{tits_algebraic_1964}. A $BN$-pair is a pair $\left(B, N\right)$ of subgroups of a group $G$ of Lie type that satisfy certain properties, allowing us to derive significant results about the group's structure.
+
+We describe here the implementation in \Lean of this notion, as well as the construction of the $BN$-pair structure on the general linear group over a field. We also show that this structure can be used to endow the projective general linear, special linear, and projective special linear groups with such a structure. Additionally, we implement a method to demonstrate the simplicity of certain groups possessing a $BN$-pair. This result is then applied to the case of the projective linear group over a field $F$, $PSL_n(F)$, in the cases where $n \geq 3$ or $n = 2$ and $|F| \geq 4$, thus proving its simplicity in \Lean.
+
+
+
+  
+
+
+
+
+
+
+
+%The classification of finite simples groups is one of the greatest feats of modern mathematics. This theorem states
+
+
